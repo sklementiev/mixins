@@ -50,14 +50,14 @@ namespace MixinsExample
 	{
 		public string Name
 		{
-			get { return (string)this.GetProperty(PropertyName.For(() => Name)); }
-			set { this.SetProperty(PropertyName.For(() => Name), value); }
+			get { return this.GetProperty(() => Name); }
+			set { this.SetProperty(() => Name, value); }
 		}
 
 		public DateTime? DateOfBirth
 		{
-			get { return (DateTime?)this.GetProperty(PropertyName.For(() => DateOfBirth)); }
-			set { this.SetProperty(PropertyName.For(() => DateOfBirth), value); }
+			get { return this.GetProperty(() => DateOfBirth); }
+			set { this.SetProperty(() => DateOfBirth, value); }
 		}
 
 		public event PropertyChangingEventHandler PropertyChanging;
@@ -90,7 +90,7 @@ namespace MixinsExample
 
 		public bool IsChanged
 		{
-			get { return (bool)this.GetProperty(PropertyName.For(() => IsChanged)); }
+			get { return this.GetProperty(() => IsChanged); }
 		}
 	}
 
@@ -103,9 +103,22 @@ namespace MixinsExample
 			creature.Scratch();
 			creature.DumpState();
 
-			//creature.StartTrackingChanges();
-			//creature.GetChanges();
-			//creature.AcceptChanges();
+			Console.WriteLine("=> Start Tracking Changes");
+			creature.StartTrackingChanges();
+			creature.PropertyChanging += (sender, eventArgs)
+				=> Console.Write("Property [{0}] is changing from [{1}] ", eventArgs.PropertyName, ((Mixin)sender).GetProperty(eventArgs.PropertyName));
+			creature.PropertyChanged += (sender, eventArgs)
+				=> Console.WriteLine("to [{0}]", ((Mixin)sender).GetProperty(eventArgs.PropertyName));
+
+			creature.Name = "Any other name";
+			creature.DateOfBirth = creature.DateOfBirth; 
+			creature.DumpState();
+			
+			var changes = creature.GetChanges();
+			
+			Console.WriteLine("=> Reject Changes");
+			creature.RejectChanges();
+			creature.DumpState();
 
 			Console.WriteLine("Clone the creature!");
 			var clone = creature.Clone();
@@ -143,7 +156,7 @@ namespace MixinsExample
 			// ReSharper restore RedundantAssignment
 			
 			GC.Collect(); // OnDispose action fires
-			
+
 			Console.ReadLine();
 		}
 	}
