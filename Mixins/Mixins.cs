@@ -314,10 +314,15 @@ namespace Mixins
 			return (Dictionary<string, Change>)self.GetProperty(Changes);
 		}
 
-		private static void StateChanging(MChangeTracking self, string name, object value)
+		private static bool DontTrackChanges(this MChangeTracking self, string name)
 		{
 			var isTrackingChanges = self.GetProperty(IsTrackingChanges);
-			if (isTrackingChanges == null || !(bool)isTrackingChanges) return;
+			return (isTrackingChanges == null || !(bool) isTrackingChanges || name == IsChanged);
+		}
+
+		private static void StateChanging(MChangeTracking self, string name, object value)
+		{
+			if (self.DontTrackChanges(name)) return;
 			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
 			if(changes.ContainsKey(name)) return;
 			changes.Add(name, new Change { OldValue = self.GetProperty(name) });
@@ -325,11 +330,17 @@ namespace Mixins
 
 		private static void StateChanged(MChangeTracking self, string name, object value)
 		{
-			var isTrackingChanges = self.GetProperty(IsTrackingChanges);
-			if (isTrackingChanges == null || !(bool)isTrackingChanges) return;
+			if (self.DontTrackChanges(name)) return;
 			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
-			changes[name].NewValue = value;
-			self.SetProperty(IsChanged, true); // TODO : reset if changes reverted
+			var change = changes[name];
+			if (Equals(change.OldValue, value))
+			{
+				changes.Remove(name);
+				if (changes.Count == 0) self.SetProperty(IsChanged, false); // reset if all changes are reverted
+				return;
+			}
+			change.NewValue = value;
+			self.SetProperty(IsChanged, true); 
 		}
 
 		#endregion

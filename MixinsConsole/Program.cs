@@ -111,21 +111,25 @@ namespace MixinsExample
 				=> Console.WriteLine("to [{0}]", ((Mixin)sender).GetProperty(eventArgs.PropertyName));
 
 			creature.Name = "Any other name";
-			creature.DateOfBirth = creature.DateOfBirth; 
+			creature.Name = "Rusty"; // should reset IsChanges
+			creature.Name = "Dusty";
+			creature.DateOfBirth = creature.DateOfBirth; // not an actual "change"
 			creature.DumpState();
 			
 			var changes = creature.GetChanges();
+			Debug.Assert(changes.Count == 1);
+			Debug.Assert(changes["Name"].OldValue.ToString() == "Rusty");
+			Debug.Assert(changes["Name"].NewValue.ToString() == "Dusty");
 			
 			Console.WriteLine("=> Reject Changes");
 			creature.RejectChanges();
 			creature.DumpState();
 
+			Console.WriteLine("=> MCloneable, MEquatable");
 			Console.WriteLine("Clone the creature!");
 			var clone = creature.Clone();
 			Trace.Assert(clone.Equals(creature));
-			Console.WriteLine("Clone is the same as original!");
-
-			//clone.DumpState();
+			Console.WriteLine("Clone is the same as the original!");
 
 			clone.PropertyChanging += (sender, eventArgs)
 				=> Console.Write("Property [{0}] is changing from [{1}] ", eventArgs.PropertyName, ((Mixin) sender).GetProperty(eventArgs.PropertyName));
@@ -142,7 +146,6 @@ namespace MixinsExample
 			clone.DateOfBirth = DateTime.Now;
 			clone.DumpState();
 			clone.CancelEdit();
-			//clone.EndEdit();
 			Console.WriteLine("=> CancelEdit");
 
 			clone.DumpState();
