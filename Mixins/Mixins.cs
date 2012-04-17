@@ -288,19 +288,25 @@ namespace Mixins
 
 		public static void AcceptChanges(this MChangeTracking self)
 		{
-			ClearState(self);
+			ClearTrackingState(self);
 		}
 
 		public static void RejectChanges(this MChangeTracking self)
 		{
-			ClearState(self);
+			var changes = (Dictionary<string, Change>)self.GetPropertyInternal(Changes);
+			foreach (var change in changes)
+			{
+				self.SetPropertyInternal(change.Key, change.Value.OldValue);
+			}
+			ClearTrackingState(self);
 		}
 
-		private static void ClearState(MChangeTracking self)
+		private static void ClearTrackingState(MChangeTracking self)
 		{
-			self.SetPropertyInternal(IsChanged, false);
-			self.GetStateInternal().Remove(IsTrackingChanges);
-			self.GetStateInternal().Remove(Changes);
+			var state = self.GetStateInternal();
+			state.Remove(IsChanged);
+			state.Remove(IsTrackingChanges);
+			state.Remove(Changes);
 		}
 
 		public static Dictionary<string, Change> GetChanges(this MChangeTracking self)
@@ -323,11 +329,10 @@ namespace Mixins
 			if (isTrackingChanges == null || !(bool)isTrackingChanges) return;
 			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
 			changes[name].NewValue = value;
-			self.SetProperty(IsChanged, true);
+			self.SetProperty(IsChanged, true); // TODO : reset if changes reverted
 		}
 
 		#endregion
-
 	}
 
 	public class Change
