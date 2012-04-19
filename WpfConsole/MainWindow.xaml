@@ -4,7 +4,10 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	Title="Person"
 	Width="525"
-	Height="350">
+	Height="350"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	xmlns:Type="clr-namespace:WpfConsole"
+	d:DataContext="{d:DesignInstance Type:Person, IsDesignTimeCreatable=False}">
 	<Grid>
 		<Grid.Resources>
 			<Style TargetType="Label">
