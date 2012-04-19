@@ -11,13 +11,9 @@ namespace WpfConsole
 	{
 		public Person()
 		{
-			this.OnPropertyChanged(() => FirstName, UpdateFullName);
-			this.OnPropertyChanged(() => LastName, UpdateFullName);
-		}
-		
-		private void UpdateFullName(string s)
-		{
-			this.RaisePropertyChanged(() => FullName);
+			this.NotifyOnChange(
+				() => FullName, 
+				() => FirstName, () => LastName);
 		}
 
 		public string FirstName
