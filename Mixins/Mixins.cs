@@ -125,6 +125,30 @@ namespace Mixins
 			self.RaisePropertyChanged(name);
 		}
 
+		public static void OnPropertyChanged<T, T1>(this T self, Expression<Func<T, T1>> property, Action<T1> action) where T : MNotifyStateChange
+		{
+			var name = PropertyName.For(property);
+			self.PropertyChanged += (sender, args) =>
+			{
+			    if (string.CompareOrdinal(args.PropertyName, name) == 0) action((T1)self.GetProperty(name));
+			};
+		}
+
+		public static void OnPropertyChanged<T>(this MNotifyStateChange self, Expression<Func<T>> property, Action<T> action)
+		{
+			var name = PropertyName.For(property);
+			self.PropertyChanged += (sender, args) =>
+			{
+				if (string.CompareOrdinal(args.PropertyName, name) == 0) action((T)self.GetProperty(name));
+			};
+		}
+
+		public static void RaisePropertyChanged(this MNotifyStateChange self, Expression<Func<object>> property)
+		{
+			var name = PropertyName.For(property);
+			RaisePropertyChangedEventInternal(self, new PropertyChangedEventArgs(name), "PropertyChanged");
+		}
+
 		public static void RaisePropertyChanged(this MNotifyStateChange self, string propertyName)
 		{
 			RaisePropertyChangedEventInternal(self, new PropertyChangedEventArgs(propertyName), "PropertyChanged");
@@ -282,21 +306,24 @@ namespace Mixins
 		public static void StartTrackingChanges(this MChangeTracking self)
 		{
 			self.SetPropertyInternal(IsTrackingChanges, true);
-			self.SetPropertyInternal(IsChanged, false);
+			self.SetProperty(IsChanged, false);
 			self.SetPropertyInternal(Changes, new Dictionary<string, Change>());
 		}
 
 		public static void AcceptChanges(this MChangeTracking self)
 		{
+			if (self.DontTrackChanges()) return;
 			ClearTrackingState(self);
 		}
 
 		public static void RejectChanges(this MChangeTracking self)
 		{
-			var changes = (Dictionary<string, Change>)self.GetPropertyInternal(Changes);
+			if (self.DontTrackChanges()) return;
+			var changes = ((Dictionary<string, Change>)self.GetPropertyInternal(Changes))
+				.Select(c => new { Property = c.Key, c.Value.OldValue }).ToArray();
 			foreach (var change in changes)
 			{
-				self.SetPropertyInternal(change.Key, change.Value.OldValue);
+				self.SetProperty(change.Property, change.OldValue);
 			}
 			ClearTrackingState(self);
 		}
@@ -304,7 +331,7 @@ namespace Mixins
 		private static void ClearTrackingState(MChangeTracking self)
 		{
 			var state = self.GetStateInternal();
-			state.Remove(IsChanged);
+			self.SetProperty(IsChanged, false);
 			state.Remove(IsTrackingChanges);
 			state.Remove(Changes);
 		}
@@ -314,15 +341,15 @@ namespace Mixins
 			return (Dictionary<string, Change>)self.GetProperty(Changes);
 		}
 
-		private static bool DontTrackChanges(this MChangeTracking self, string name)
+		private static bool DontTrackChanges(this MChangeTracking self)
 		{
 			var isTrackingChanges = self.GetProperty(IsTrackingChanges);
-			return (isTrackingChanges == null || !(bool) isTrackingChanges || name == IsChanged);
+			return (isTrackingChanges == null || !(bool) isTrackingChanges);
 		}
 
 		private static void StateChanging(MChangeTracking self, string name, object value)
 		{
-			if (self.DontTrackChanges(name)) return;
+			if (self.DontTrackChanges() || name == IsChanged) return;
 			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
 			if(changes.ContainsKey(name)) return;
 			changes.Add(name, new Change { OldValue = self.GetProperty(name) });
@@ -330,7 +357,7 @@ namespace Mixins
 
 		private static void StateChanged(MChangeTracking self, string name, object value)
 		{
-			if (self.DontTrackChanges(name)) return;
+			if (self.DontTrackChanges() || name == IsChanged) return;
 			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
 			var change = changes[name];
 			if (Equals(change.OldValue, value))
@@ -360,6 +387,12 @@ namespace Mixins
 	public static class PropertyName
 	{
 		public static string For<T>(Expression<Func<T, object>> expression)
+		{
+			var body = expression.Body;
+			return GetMemberName(body);
+		}
+
+		public static string For<T, T1>(Expression<Func<T, T1>> expression)
 		{
 			var body = expression.Body;
 			return GetMemberName(body);

@@ -9,24 +9,27 @@ namespace WpfConsole
 {
 	public class Person : Mixin, MNotifyStateChange, MChangeTracking
 	{
+		public Person()
+		{
+			this.OnPropertyChanged(() => FirstName, UpdateFullName);
+			this.OnPropertyChanged(() => LastName, UpdateFullName);
+		}
+		
+		private void UpdateFullName(string s)
+		{
+			this.RaisePropertyChanged(() => FullName);
+		}
+
 		public string FirstName
 		{
 			get { return this.GetProperty(() => FirstName); }
-			set
-			{
-				this.SetProperty(() => FirstName, value);
-				this.RaisePropertyChanged("FullName");
-			}
+			set { this.SetProperty(() => FirstName, value); }
 		}
 
 		public string LastName
 		{
 			get { return this.GetProperty(() => LastName); }
-			set
-			{
-				this.SetProperty(() => LastName, value);
-				this.RaisePropertyChanged("FullName");
-			}
+			set { this.SetProperty(() => LastName, value); }
 		}
 
 		public string FullName
