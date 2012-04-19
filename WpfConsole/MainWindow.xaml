@@ -24,13 +24,13 @@
 				<Setter Property="Width" Value="75" />
 				<Setter Property="Margin" Value="0,6,6,6" />
 			</Style>
-
-
 		</Grid.Resources>
+
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="110*" />
 			<ColumnDefinition Width="393*" />
 		</Grid.ColumnDefinitions>
+
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
@@ -47,24 +47,26 @@
 			Grid.Row="1"
 			Grid.Column="1"
 			Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" />
+		
 		<Label Grid.Row="2" Content="Full Name" />
 		<Label
 			Grid.Row="2"
 			Grid.Column="1"
 			Content="{Binding FullName}" />
+		
 		<StackPanel
 			Grid.Row="4"
 			Grid.Column="1"
 			HorizontalAlignment="Right"
 			Orientation="Horizontal">
-			<Button Content="Save"
+			<Button
 				Name="Save"
-				Click="SaveClick" />
-
-			<Button Content="Reset"
+				Click="SaveClick"
+				Content="Save" />
+			<Button
 				Name="Reset"
-				Click="ResetClick" />
-
+				Click="ResetClick"
+				Content="Reset" />
 		</StackPanel>
 	</Grid>
 </Window>
