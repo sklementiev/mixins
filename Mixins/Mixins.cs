@@ -127,20 +127,19 @@ namespace Mixins
 
 		public static void OnPropertyChanged<T, T1>(this T self, Expression<Func<T, T1>> property, Action<T1> action) where T : MNotifyStateChange
 		{
-			var name = PropertyName.For(property);
-			self.PropertyChanged += (sender, args) =>
-			{
-			    if (string.CompareOrdinal(args.PropertyName, name) == 0) action((T1)self.GetProperty(name));
-			};
+			var propertyName = PropertyName.For(property);
+			self.HookToPropertyChangedEvent(propertyName, action);
 		}
 
 		public static void OnPropertyChanged<T>(this MNotifyStateChange self, Expression<Func<T>> property, Action<T> action)
 		{
-			var name = PropertyName.For(property);
-			self.PropertyChanged += (sender, args) =>
-			{
-				if (string.CompareOrdinal(args.PropertyName, name) == 0) action((T)self.GetProperty(name));
-			};
+			var propertyName = PropertyName.For(property);
+			self.HookToPropertyChangedEvent(propertyName, action);
+		}
+
+		private static void HookToPropertyChangedEvent<T>(this MNotifyStateChange self, string propertyName, Action<T> action)
+		{
+			self.PropertyChanged += (sender, args) => { if (string.CompareOrdinal(args.PropertyName, propertyName) == 0) action((T)self.GetProperty(propertyName)); };
 		}
 
 		public static void RaisePropertyChanged(this MNotifyStateChange self, Expression<Func<object>> property)
@@ -386,11 +385,11 @@ namespace Mixins
 	/// </summary>
 	public static class PropertyName
 	{
-		public static string For<T>(Expression<Func<T, object>> expression)
-		{
-			var body = expression.Body;
-			return GetMemberName(body);
-		}
+		//public static string For<T>(Expression<Func<T, object>> expression)
+		//{
+		//    var body = expression.Body;
+		//    return GetMemberName(body);
+		//}
 
 		public static string For<T, T1>(Expression<Func<T, T1>> expression)
 		{
@@ -398,11 +397,11 @@ namespace Mixins
 			return GetMemberName(body);
 		}
 		
-		public static string For(Expression<Func<object>> expression)
-		{
-			var body = expression.Body;
-			return GetMemberName(body);
-		}
+		//public static string For(Expression<Func<object>> expression)
+		//{
+		//    var body = expression.Body;
+		//    return GetMemberName(body);
+		//}
 
 		public static string For<T>(Expression<Func<T>> expression)
 		{
