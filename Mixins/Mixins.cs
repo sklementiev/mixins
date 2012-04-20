@@ -60,6 +60,11 @@ namespace Mixins
 			return State.GetOrCreateValue(self);
 		}
 
+		internal static Dictionary<string, object> GetPublicState(this Mixin self)
+		{
+			return self.GetStateInternal().Where(c => c.Key.First() != '!').ToDictionary(c => c.Key, c => c.Value); 
+		}
+
 		internal static void SetPropertyInternal(this Mixin self, string name, object value)
 		{
 			self.GetStateInternal()[name] = value;
@@ -257,8 +262,8 @@ namespace Mixins
 
 		public static bool Equals<T>(this MEquatable self, T other) where T : MEquatable
 		{
-			var properties = State.GetOrCreateValue(self);
-			var otherProperties = State.GetOrCreateValue(other);
+			var properties = self.GetPublicState();
+			var otherProperties = other.GetPublicState(); 
 			return properties.SequenceEqual(otherProperties);
 		}
 

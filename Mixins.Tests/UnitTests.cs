@@ -44,6 +44,7 @@ namespace Mixins.Tests
 		{
 			var clone = Person.Clone();
 			Person.BeginEdit();
+			Assert.IsTrue(clone.Equals(Person));
 			Person.FirstName = "New name1";
 			Person.LastName = "New name2";
 			Person.DateOfBirth = DateTime.Now;
