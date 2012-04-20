@@ -7,7 +7,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MixinsConsole", "MixinsCons
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfConsole", "WpfConsole\WpfConsole.csproj", "{AC272B06-C262-4819-99A7-4183E9EEAAAA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mixins.Tests", "Mixins.Tests\Mixins.Tests.csproj", "{A11444C7-165C-4627-9716-479B4CEBCFA5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BE5F2340-66E3-4647-9E02-1708F3B84A3E}"
+	ProjectSection(SolutionItems) = preProject
+		Local.testsettings = Local.testsettings
+		Mixins.vsmdi = Mixins.vsmdi
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Mixins.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -47,6 +59,16 @@ Global
 		{AC272B06-C262-4819-99A7-4183E9EEAAAA}.Release|Mixed Platforms.Build.0 = Release|x86
 		{AC272B06-C262-4819-99A7-4183E9EEAAAA}.Release|x86.ActiveCfg = Release|x86
 		{AC272B06-C262-4819-99A7-4183E9EEAAAA}.Release|x86.Build.0 = Release|x86
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

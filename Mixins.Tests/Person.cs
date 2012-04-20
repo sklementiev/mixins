@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using Mixins;
 
-namespace WpfConsole
+namespace Mixins.Tests
 {
-	public class Person : Mixin, MNotifyStateChange, MChangeTracking
+	public class Person : Mixin, MNotifyStateChange, MChangeTracking, MEquatable, MCloneable, MEditableObject
 	{
 		public Person()
 		{
@@ -45,5 +41,26 @@ namespace WpfConsole
 		{
 			get { return this.GetProperty(() => IsChanged); }
 		}
+
+		public bool Equals(MEquatable other)
+		{
+			return this.Equals<MEquatable>(other);
+		}
+
+		void IEditableObject.BeginEdit()
+		{
+			this.BeginEdit();
+		}
+
+		void IEditableObject.EndEdit()
+		{
+			this.EndEdit();
+		}
+
+		void IEditableObject.CancelEdit()
+		{
+			this.CancelEdit();
+		}
+
 	}
 }

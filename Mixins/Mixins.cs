@@ -334,13 +334,14 @@ namespace Mixins
 			{
 				self.SetProperty(change.Property, change.OldValue);
 			}
+			self.SetProperty(IsChanged, false);
 			ClearTrackingState(self);
 		}
 
 		private static void ClearTrackingState(MChangeTracking self)
 		{
 			var state = self.GetStateInternal();
-			self.SetProperty(IsChanged, false);
+			state.Remove(IsChanged);
 			state.Remove(IsTrackingChanges);
 			state.Remove(Changes);
 		}
