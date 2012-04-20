@@ -108,13 +108,15 @@ namespace Mixins.Tests
 			Assert.IsTrue(clone.Equals(Person));
 
 			// idempotent
-			//Person.RejectChanges();
-			//Person.RejectChanges();
-			//Person.StartTrackingChanges();
-			//Person.StartTrackingChanges();
-			//Person.FirstName = "Foo";
-			//var changes = Person.GetChanges();
-			//Assert()
+			Person.RejectChanges();
+			Person.RejectChanges();
+			Person.StartTrackingChanges();
+			Person.StartTrackingChanges();
+			Person.FirstName = "Foo";
+			var changes = Person.GetChanges();
+			Assert.IsTrue(changes.Count == 1);
+			Assert.IsTrue(changes["FirstName"].OldValue.ToString() == clone.FirstName);
+			Assert.IsTrue(changes["FirstName"].NewValue.ToString() == "Foo");
 
 		}
 
