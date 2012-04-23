@@ -56,6 +56,7 @@ namespace Mixins.Tests
 			Person.CancelEdit();
 			Person.BeginEdit();
 			Person.BeginEdit();
+            Assert.IsTrue(clone.Equals(Person));
 			Person.FirstName = "Alice";
 			Person.EndEdit();
 			Person.EndEdit();
@@ -76,6 +77,19 @@ namespace Mixins.Tests
 			Assert.IsTrue(firstNameChanged);
 		}
 
+        [TestMethod]
+        public void AssigningSameValueDoesntChangeState()
+        {
+            var firstNameChanged = false;
+            Person.OnPropertyChanged(c => c.FirstName, s =>
+            {
+                firstNameChanged = true;
+            });
+
+            Person.FirstName = Person.FirstName;
+            Assert.IsFalse(firstNameChanged);
+        }
+
 		[TestMethod]
 		public void FullNameDependsOnOtherProperties()
 		{
@@ -86,6 +100,9 @@ namespace Mixins.Tests
 			});
 			Person.FirstName = "New";
 			Assert.IsTrue(fullNameChanged);
+            fullNameChanged = false;
+            Person.LastName = "New";
+            Assert.IsTrue(fullNameChanged);
 		}
 
 		[TestMethod]
@@ -118,11 +135,7 @@ namespace Mixins.Tests
 			Assert.IsTrue(changes.Count == 1);
 			Assert.IsTrue(changes["FirstName"].OldValue.ToString() == clone.FirstName);
 			Assert.IsTrue(changes["FirstName"].NewValue.ToString() == "Foo");
-
 		}
-
-		
-
 
 	}
 }
