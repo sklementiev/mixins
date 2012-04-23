@@ -20,8 +20,8 @@ namespace Mixins
 	{
 		bool IsChanged { get; }
 	}
+    public interface MMapper : Mixin { } // transfer data between mixins using conventions (same property names and data types)
 	public interface MComposite : Mixin { } //TODO define composite structure for complex object graphs
-	public interface MMapper : Mixin { } //TODO transfer data between mixins using conventions
 
 	public static partial class Extensions
 	{
@@ -386,7 +386,23 @@ namespace Mixins
 		}
 
 		#endregion
-	}
+
+        #region	MMapper
+
+        public static void MapTo(this MMapper self, Mixin destination)
+        {
+            var state = self.GetPublicState();
+            var otherState = destination.GetPublicState();
+            var sameProps = state.Select(c => c.Key).Intersect(otherState.Select(c => c.Key));
+            foreach (var prop in sameProps.Where(prop => otherState[prop].GetType().IsInstanceOfType(state[prop])))
+            {
+                destination.SetProperty(prop, self.GetProperty(prop));
+            }
+        }
+
+        #endregion
+
+    }
 
 	public class Change
 	{
