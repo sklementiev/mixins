@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +19,10 @@ namespace Mixins.Tests
 			{
 			    FirstName = "Bill",
 				LastName = "Klingon",
-				DateOfBirth = DateTime.Parse("11/11/11")
+				DateOfBirth = DateTime.Parse("11/11/11"),
+                //Friends = new List<Person> { 
+                //    new Person { FirstName = "Freda", LastName = "Friend" }, 
+                //    new Person { FirstName = "Joe", LastName = "Doe" }}
 			};
 		}
 
@@ -133,8 +137,8 @@ namespace Mixins.Tests
 			Person.FirstName = "Foo";
 			var changes = Person.GetChanges();
 			Assert.IsTrue(changes.Count == 1);
-			Assert.IsTrue(changes["FirstName"].OldValue.ToString() == clone.FirstName);
-            Assert.IsTrue(changes["FirstName"].NewValue.ToString() == "Foo");
+			Assert.IsTrue(((ValueChange)changes["FirstName"]).OldValue.ToString() == clone.FirstName);
+            Assert.IsTrue(((ValueChange)changes["FirstName"]).NewValue.ToString() == "Foo");
 		}
 
         [TestMethod]
@@ -164,6 +168,16 @@ namespace Mixins.Tests
             Assert.AreEqual(13, bar.Count);
             Assert.AreEqual(100, foo.Length);
             Assert.AreEqual("LONG", bar.Length);
+        }
+
+        [TestMethod]
+        public void Test()
+        {
+            Person.Friends = new ObservableCollection<Person> { new Person { FirstName = "Liz", LastName = "Tayler" } };
+            Person.StartTrackingChanges();
+            Person.StartTrackingChanges();
+            Person.Friends.Add(new Person { FirstName = "Foo", LastName = "Bar" });
+            Person.Friends.Clear(); // ? what to return as Changes for list? set of elements that changed, added, removed!
         }
 
 	}

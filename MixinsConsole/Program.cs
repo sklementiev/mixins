@@ -118,8 +118,8 @@ namespace MixinsExample
 			
 			var changes = creature.GetChanges();
 			Debug.Assert(changes.Count == 1);
-			Debug.Assert(changes["Name"].OldValue.ToString() == "Rusty");
-			Debug.Assert(changes["Name"].NewValue.ToString() == "Dusty");
+            //Debug.Assert(changes["Name"].OldValue.ToString() == "Rusty");
+            //Debug.Assert(changes["Name"].NewValue.ToString() == "Dusty");
 			
 			Console.WriteLine("=> Reject Changes");
 			creature.RejectChanges();

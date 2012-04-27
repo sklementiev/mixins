@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace Mixins.Tests
 {
-	public class Person : Mixin, MNotifyStateChange, MChangeTracking, MEquatable, MCloneable, MEditableObject
+	public class Person : Mixin, MNotifyStateChange, MChangeTracking, MEquatable, MCloneable, MEditableObject, MComposite
 	{
 		public Person()
 		{
@@ -33,6 +35,12 @@ namespace Mixins.Tests
 			get { return this.GetProperty(() => DateOfBirth); }
 			set { this.SetProperty(() => DateOfBirth, value); }
 		}
+
+        public ObservableCollection<Person> Friends
+        {
+            get { return this.GetProperty(() => Friends); }
+            set { this.SetProperty(() => Friends, value); }
+        }
 
 		public event PropertyChangingEventHandler PropertyChanging;
 		public event PropertyChangedEventHandler PropertyChanged;

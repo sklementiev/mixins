@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
@@ -20,7 +22,7 @@ namespace Mixins
 	{
 		bool IsChanged { get; }
 	}
-    public interface MMapper : Mixin { } // transfer data between mixins using conventions (same property names and data types)
+    public interface MMapper : Mixin { } // transfer data between mixins using convention (same property names and data types)
 	public interface MComposite : Mixin { } //TODO define composite structure for complex object graphs
 
 	public static partial class Extensions
@@ -44,7 +46,7 @@ namespace Mixins
 		public static void SetProperty(this Mixin self, string name, object value)
 		{
 			if(Equals(value, self.GetProperty(name))) return;
-			StateChanging(self, name, value);
+			var newValue = StateChanging(self, name, value);
 			self.SetPropertyInternal(name, value);
 			StateChanged(self, name, value);
 		}
@@ -78,7 +80,7 @@ namespace Mixins
 		}
 
 		// generic interceptors
-		private static void StateChanging(object self, string name, object value)
+		private static object StateChanging(object self, string name, object value)
 		{
 			var notifyStateChange = self as MNotifyStateChange;
 			if (notifyStateChange != null)
@@ -90,6 +92,8 @@ namespace Mixins
 			{
 				StateChanging(changeTracking, name, value);
 			}
+
+            return value;
 		}
 
 		private static void StateChanged(object self, string name, object value)
@@ -108,7 +112,7 @@ namespace Mixins
 
 		public static void DumpState(this Mixin self)
 		{
-			var properties = State.GetOrCreateValue(self);
+			var properties = self.GetStateInternal();
 			Console.WriteLine("=========================================================================================================");
 			foreach (var propertyName in properties.Keys)
 			{
@@ -212,7 +216,7 @@ namespace Mixins
 		// simple implementation of shallow clone
 		public static T Clone<T>(this T self) where T : Mixin
 		{
-			var properties = State.GetOrCreateValue(self);
+			var properties = self.GetPublicState();
 			var clonedProperties = properties.Keys.ToDictionary(key => key, key => properties[key]);
 			var clone = Activator.CreateInstance(self.GetType());
 			State.Add(clone, clonedProperties);
@@ -228,7 +232,7 @@ namespace Mixins
 		public static void BeginEdit(this MEditableObject self)
 		{
 			// store current state to temporary storage
-			var state = State.GetOrCreateValue(self);
+			var state = self.GetPublicState();
 			object temp;
 			if(state.TryGetValue(TemporaryState, out temp)) return; // idempotent
 			var clone = self.Clone<Mixin>();
@@ -238,7 +242,7 @@ namespace Mixins
 		public static void EndEdit(this MEditableObject self)
 		{
 			// accept current state, discard old state
-			var state = State.GetOrCreateValue(self);
+			var state = self.GetStateInternal();
 			state.Remove(TemporaryState);
 		}
 
@@ -315,14 +319,41 @@ namespace Mixins
 
 		private const string IsTrackingChanges = "!isTrackingChanges";
 		private const string Changes = "!changes";
-		private const string IsChanged = "IsChanged";
+        private const string Shapshots = "!shapshots";
+        private const string IsChanged = "IsChanged";
 
 		public static void StartTrackingChanges(this MChangeTracking self)
 		{
-			self.SetPropertyInternal(IsTrackingChanges, true);
+            if (!self.DontTrackChanges()) return;
+
+            self.SetPropertyInternal(IsTrackingChanges, true);
 			self.SetProperty(IsChanged, false);
 			self.SetPropertyInternal(Changes, new Dictionary<string, Change>());
+            // todo : recursion
+
+            var shapshots = new Dictionary<string, ArrayList>();
+            self.SetPropertyInternal(Shapshots, shapshots);
+            
+            // Subscribe to all props with INotifyCollectionChanged there, make shapshot of elements, IsChanged based on IEquatable
+		    var state = self.GetPublicState();
+            foreach (var prop in state)
+            {
+                var incc = prop.Value as INotifyCollectionChanged;
+                if(incc == null) continue;
+                var name = prop.Key;
+                var list = prop.Value as ICollection;
+                if (list != null) shapshots[name] = new ArrayList(list); // snapshots elements are the same as on real list!
+                incc.CollectionChanged += (sender, args) => OnListChanged(sender, args, self, name);
+		    }
+
 		}
+
+        public static void OnListChanged(object list, NotifyCollectionChangedEventArgs eventArgs, MChangeTracking self, string propertyName)
+        {
+            // if list differs from snapshot, raise IsChanged, raise INPC with list name
+            // todo: getchanges() should calculate list diffs on request
+            int i = 1;
+        }
 
 		public static void AcceptChanges(this MChangeTracking self)
 		{
@@ -333,8 +364,10 @@ namespace Mixins
 		public static void RejectChanges(this MChangeTracking self)
 		{
 			if (self.DontTrackChanges()) return;
+            // TODO. Lists
 			var changes = ((Dictionary<string, Change>)self.GetPropertyInternal(Changes))
-				.Select(c => new { Property = c.Key, c.Value.OldValue }).ToArray();
+				.Where(c=>c.Value is ValueChange)
+                .Select(c => new { Property = c.Key, ((ValueChange)c.Value).OldValue }).ToArray();
 			foreach (var change in changes)
 			{
 				self.SetProperty(change.Property, change.OldValue);
@@ -349,6 +382,7 @@ namespace Mixins
 			state.Remove(IsChanged);
 			state.Remove(IsTrackingChanges);
 			state.Remove(Changes);
+            state.Remove(Shapshots);
 		}
 
 		public static Dictionary<string, Change> GetChanges(this MChangeTracking self)
@@ -367,14 +401,36 @@ namespace Mixins
 			if (self.DontTrackChanges() || name == IsChanged) return;
 			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
 			if(changes.ContainsKey(name)) return;
-			changes.Add(name, new Change { OldValue = self.GetProperty(name) });
+            //// consider all INotifyCollectionChanged props as trackable
+            //var incc = value as INotifyCollectionChanged;
+            //if (incc != null)
+            //{
+            //    //var handler = new CollectionChangedAction();
+            //    //handler.Action = (o, args, zz, xx) => { int i = 1; };
+            //    //incc.CollectionChanged += (sender, args) => handler.Action(sender, args, self, name);
+            //    incc.CollectionChanged += (sender, args) => Action1(sender, args, self, name);
+            //}
+            //// todo: lists
+            changes.Add(name, new ValueChange { OldValue = self.GetProperty(name) });
 		}
+
+        //internal class CollectionChangedAction
+        //{
+        //    public Action<object, NotifyCollectionChangedEventArgs, MChangeTracking, string> Action { get; set; }
+        //}
+
+        //public static void Action1(object a, NotifyCollectionChangedEventArgs b, MChangeTracking c, string d)
+        //{
+        //    int i = 1;
+        //}
+
 
 		private static void StateChanged(MChangeTracking self, string name, object value)
 		{
 			if (self.DontTrackChanges() || name == IsChanged) return;
 			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
-			var change = changes[name];
+			// todo: lists
+            var change = (ValueChange)changes[name];
 			if (Equals(change.OldValue, value))
 			{
 				changes.Remove(name);
@@ -402,13 +458,34 @@ namespace Mixins
 
         #endregion
 
+        #region	MComposite
+
+        public static void DefineComposite(this MComposite self, Mixin destination)
+        {
+            // TODO
+        }
+
+	    #endregion
     }
 
-	public class Change
+    public abstract class Change
+    {
+    }
+
+	// ? ref changes ? how to deal with
+    public class ValueChange : Change
 	{
 		public object OldValue { get; set; }
 		public object NewValue { get; set; }
 	}
+
+    public class CollectionChange : Change
+    {
+        public IEnumerable Added { get; set; }
+        public IEnumerable Removed { get; set; }
+        public IEnumerable<IEnumerable<Change>> Changed { get; set; }
+    }
+
 
 	#region	Utils
 	
