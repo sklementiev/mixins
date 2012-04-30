@@ -169,7 +169,7 @@ namespace Mixins
 
 		public static void RaisePropertyChanged(this MNotifyStateChange self, string propertyName)
 		{
-			RaisePropertyChangedEventInternal(self, new PropertyChangedEventArgs(propertyName), "PropertyChanged");
+            RaisePropertyChangedEventInternal(self, new PropertyChangedEventArgs(propertyName), "PropertyChanged");
 		}
 
 		public static void RaisePropertyChanging(this MNotifyStateChange self, string propertyName)
@@ -179,8 +179,10 @@ namespace Mixins
 
 		private static void RaisePropertyChangedEventInternal(INotifyPropertyChanged bindableObject, EventArgs eventArgs, string eventName)
 		{
-			// get the internal eventDelegate
-			var bindableObjectType = bindableObject.GetType();
+			if(bindableObject == null) return;
+
+            // get the internal eventDelegate
+            var bindableObjectType = bindableObject.GetType();
 
 			// search the base type, which contains the PropertyChanged event field.
 			FieldInfo propChangedFieldInfo = null;
@@ -327,14 +329,14 @@ namespace Mixins
             if (!self.DontTrackChanges()) return;
 
             self.SetPropertyInternal(IsTrackingChanges, true);
-			self.SetProperty(IsChanged, false);
+			self.SetPropertyInternal(IsChanged, false);
 			self.SetPropertyInternal(Changes, new Dictionary<string, Change>());
             // todo : recursion
 
             var shapshots = new Dictionary<string, ArrayList>();
             self.SetPropertyInternal(Shapshots, shapshots);
             
-            // Subscribe to all props with INotifyCollectionChanged there, make shapshot of elements, IsChanged based on IEquatable
+            // Subscribe to all props with INotifyCollectionChanged there, make shapshot of elements
 		    var state = self.GetPublicState();
             foreach (var prop in state)
             {
@@ -345,14 +347,16 @@ namespace Mixins
                 if (list != null) shapshots[name] = new ArrayList(list); // snapshots elements are the same as on real list!
                 incc.CollectionChanged += (sender, args) => OnListChanged(sender, args, self, name);
 		    }
-
-		}
+        }
 
         public static void OnListChanged(object list, NotifyCollectionChangedEventArgs eventArgs, MChangeTracking self, string propertyName)
         {
             // if list differs from snapshot, raise IsChanged, raise INPC with list name
+            var collection = list as ICollection;
+            var shapshot = ((Dictionary<string, ArrayList>)self.GetPropertyInternal(Shapshots))[propertyName];
+            self.SetProperty(IsChanged, !collection.EqualsTo(shapshot));
+            (self as MNotifyStateChange).RaisePropertyChanged(propertyName); 
             // todo: getchanges() should calculate list diffs on request
-            int i = 1;
         }
 
 		public static void AcceptChanges(this MChangeTracking self)
@@ -366,7 +370,7 @@ namespace Mixins
 			if (self.DontTrackChanges()) return;
             // TODO. Lists
 			var changes = ((Dictionary<string, Change>)self.GetPropertyInternal(Changes))
-				.Where(c=>c.Value is ValueChange)
+				.Where(c => c.Value is ValueChange)
                 .Select(c => new { Property = c.Key, ((ValueChange)c.Value).OldValue }).ToArray();
 			foreach (var change in changes)
 			{
@@ -387,7 +391,16 @@ namespace Mixins
 
 		public static Dictionary<string, Change> GetChanges(this MChangeTracking self)
 		{
-			return (Dictionary<string, Change>)self.GetProperty(Changes);
+            var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
+		    var snapshots = (Dictionary<string, ArrayList>)self.GetPropertyInternal(Shapshots);
+		    foreach (var shapshot in snapshots)
+		    {
+		        var list = self.GetPropertyInternal(shapshot.Key) as ICollection;
+                var diff = list.GetDiff(shapshot.Value);
+                changes.Add(shapshot.Key, diff);
+		    }
+
+            return changes;
 		}
 
 		private static bool DontTrackChanges(this MChangeTracking self)
@@ -401,29 +414,8 @@ namespace Mixins
 			if (self.DontTrackChanges() || name == IsChanged) return;
 			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
 			if(changes.ContainsKey(name)) return;
-            //// consider all INotifyCollectionChanged props as trackable
-            //var incc = value as INotifyCollectionChanged;
-            //if (incc != null)
-            //{
-            //    //var handler = new CollectionChangedAction();
-            //    //handler.Action = (o, args, zz, xx) => { int i = 1; };
-            //    //incc.CollectionChanged += (sender, args) => handler.Action(sender, args, self, name);
-            //    incc.CollectionChanged += (sender, args) => Action1(sender, args, self, name);
-            //}
-            //// todo: lists
             changes.Add(name, new ValueChange { OldValue = self.GetProperty(name) });
 		}
-
-        //internal class CollectionChangedAction
-        //{
-        //    public Action<object, NotifyCollectionChangedEventArgs, MChangeTracking, string> Action { get; set; }
-        //}
-
-        //public static void Action1(object a, NotifyCollectionChangedEventArgs b, MChangeTracking c, string d)
-        //{
-        //    int i = 1;
-        //}
-
 
 		private static void StateChanged(MChangeTracking self, string name, object value)
 		{
@@ -472,7 +464,7 @@ namespace Mixins
     {
     }
 
-	// ? ref changes ? how to deal with
+	// ? ref changes ? how to deal with ? maybe only support Mixins
     public class ValueChange : Change
 	{
 		public object OldValue { get; set; }
@@ -481,9 +473,9 @@ namespace Mixins
 
     public class CollectionChange : Change
     {
-        public IEnumerable Added { get; set; }
-        public IEnumerable Removed { get; set; }
-        public IEnumerable<IEnumerable<Change>> Changed { get; set; }
+        public List<object> Added { get; set; }
+        public IEnumerable<object> Removed { get; set; }
+        public IEnumerable<object> Changed { get; set; }
     }
 
 
@@ -530,6 +522,90 @@ namespace Mixins
 			throw new Exception(string.Format("Could not determine member from {0}", expression));
 		}
 	}
+
+    public static class CollectionHelper
+    {
+        // TODO: Compare based on IEquitable not refs
+        public static bool EqualsTo(this ICollection left, ICollection right)
+        {
+            if (left.Count != right.Count) return false;
+
+            var dict = new Dictionary<object, int>();
+
+            foreach (var member in left)
+            {
+                if (!dict.ContainsKey(member)) dict[member] = 1;
+                else dict[member]++;
+            }
+
+            foreach (var member in right)
+            {
+                if (!dict.ContainsKey(member)) return false;
+                dict[member]--;
+            }
+
+            return dict.All(kvp => kvp.Value == 0);
+        }
+
+        // TODO: Compare based on IEquitable not refs
+        public static CollectionChange GetDiff(this ICollection self, ICollection other)
+        {
+            var added = new List<object>();
+            var result = new CollectionChange
+            {
+                Added = added,
+                //Removed = new ArrayList(),
+                //Changed = new ArrayList()
+            };
+
+            var dictSelf = new Dictionary<object, int>(); // item, count
+
+            foreach (var item in self)
+            {
+                if (!dictSelf.ContainsKey(item)) dictSelf[item] = 1;
+                else dictSelf[item]++;
+            }
+
+            var dictOther = new Dictionary<object, int>(); // item, count
+
+            foreach (var item in other)
+            {
+                if (!dictOther.ContainsKey(item)) dictOther[item] = 1;
+                else dictOther[item]++;
+            }
+
+            // added to self
+            foreach (var pair in dictSelf)
+            {
+                // not there
+                if(!dictOther.ContainsKey(pair.Key))
+                {
+                    for (var i = 0; i < pair.Value; i++)
+                    {
+                        added.Add(pair.Key);
+                    }
+                }
+                // partially there
+                if (dictOther.ContainsKey(pair.Key))
+                {
+                    var newItems = pair.Value - dictOther[pair.Key];
+                    if (newItems > 0)
+                    {
+                        for (var i = 0; i < newItems; i++)
+                        {
+                            added.Add(pair.Key);
+                        }
+                    }
+                }
+            }
+
+
+
+            return result;
+        } 
+
+    }
+
 
 	#endregion	
 }
