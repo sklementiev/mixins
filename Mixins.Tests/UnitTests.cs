@@ -204,12 +204,44 @@ namespace Mixins.Tests
         }
 
         [TestMethod]
+        public void TestCollectionDiffDeleted()
+        {
+            var old = new List<string>
+            {
+                "One",
+                "One",
+                "Two",
+                "Three"
+            };
+
+            var current = new List<string>
+            {
+                "One",
+            };
+
+            var deleted = new List<string>
+            {
+                "One",
+                "Two",
+                "Three"            
+            };
+
+            var diff = current.GetDiff(old);
+            CollectionAssert.AreEqual(deleted, diff.Removed);
+        }
+
+
+        [TestMethod]
         public void TrackCollectionChanges()
         {
             var changedRaisedTimes = 0;
             var listChangedRaisedTimes = 0;
 
-            Person.Friends = new ObservableCollection<Person> { new Person { FirstName = "Liz", LastName = "Tayler" } };
+            Person.Friends = new ObservableCollection<Person>
+            {
+                new Person { FirstName = "Liz", LastName = "Tayler" },
+                new Person { FirstName = "Liv", LastName = "Tayler" }
+            };
 
             Person.OnPropertyChanged(c => c.IsChanged, s =>
             {
@@ -227,17 +259,32 @@ namespace Mixins.Tests
             Person.Friends.Add(new Person { FirstName = "Foo", LastName = "Bar" });
             Assert.IsTrue(Person.IsChanged);
             var changes = Person.GetChanges();
-            // TODO
-
+            var change = changes["Friends"] as CollectionChange;
+            Assert.IsTrue(change.Added.Count == 1);
+            Assert.IsTrue(change.Removed.Count == 0);
+            Assert.IsTrue(change.Changed.Count == 0);
+            
             Person.Friends.RemoveAt(Person.Friends.Count() - 1);
+
+            changes = Person.GetChanges();
+            Assert.AreEqual(0, changes.Count); 
+
             Assert.IsFalse(Person.IsChanged);
-            Person.Friends.Clear();
+            Person.Friends.RemoveAt(Person.Friends.Count() - 1);
             Assert.IsTrue(Person.IsChanged);
 
-            Assert.AreEqual(3, changedRaisedTimes);
-            Assert.AreEqual(3, listChangedRaisedTimes);
+            changes = Person.GetChanges();
+            change = changes["Friends"] as CollectionChange;
+            Assert.IsTrue(change.Added.Count == 0); 
+            Assert.IsTrue(change.Removed.Count == 1);
+            Assert.IsTrue(change.Changed.Count == 0);
 
-            //Person.Friends.Clear(); // ? what to return as Changes for list? set of elements that changed, added, removed!
+            Person.Friends[Person.Friends.Count() - 1].LastName = "Murray";
+            changes = Person.GetChanges();
+            change = changes["Friends"] as CollectionChange;
+
+            Assert.AreEqual(4, changedRaisedTimes);
+            Assert.AreEqual(4, listChangedRaisedTimes);
         }
 
 	}

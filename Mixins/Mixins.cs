@@ -343,9 +343,11 @@ namespace Mixins
                 var incc = prop.Value as INotifyCollectionChanged;
                 if(incc == null) continue;
                 var name = prop.Key;
-                var list = prop.Value as ICollection;
-                if (list != null) shapshots[name] = new ArrayList(list); // snapshots elements are the same as on real list!
+                var list = (ICollection)prop.Value;
+                var trackableList = list.AsQueryable().OfType<MChangeTracking>().ToList();
+                shapshots[name] = new ArrayList(list); // snapshots elements are the same as on real list!
                 incc.CollectionChanged += (sender, args) => OnListChanged(sender, args, self, name);
+                trackableList.ForEach(c => c.StartTrackingChanges());
 		    }
         }
 
@@ -392,15 +394,16 @@ namespace Mixins
 		public static Dictionary<string, Change> GetChanges(this MChangeTracking self)
 		{
             var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
-		    var snapshots = (Dictionary<string, ArrayList>)self.GetPropertyInternal(Shapshots);
+            var result = new Dictionary<string, Change>(changes);
+            var snapshots = (Dictionary<string, ArrayList>)self.GetPropertyInternal(Shapshots);
 		    foreach (var shapshot in snapshots)
 		    {
 		        var list = self.GetPropertyInternal(shapshot.Key) as ICollection;
                 var diff = list.GetDiff(shapshot.Value);
-                changes.Add(shapshot.Key, diff);
+                if (diff.Added.Count > 0 || diff.Removed.Count > 0 || diff.Changed.Count > 0) result.Add(shapshot.Key, diff);
 		    }
 
-            return changes;
+            return result;
 		}
 
 		private static bool DontTrackChanges(this MChangeTracking self)
@@ -474,8 +477,8 @@ namespace Mixins
     public class CollectionChange : Change
     {
         public List<object> Added { get; set; }
-        public IEnumerable<object> Removed { get; set; }
-        public IEnumerable<object> Changed { get; set; }
+        public List<object> Removed { get; set; }
+        public List<object> Changed { get; set; }
     }
 
 
@@ -551,11 +554,13 @@ namespace Mixins
         public static CollectionChange GetDiff(this ICollection self, ICollection other)
         {
             var added = new List<object>();
+            var removed = new List<object>();
+            var changed = new List<object>();
             var result = new CollectionChange
             {
                 Added = added,
-                //Removed = new ArrayList(),
-                //Changed = new ArrayList()
+                Removed = removed,
+                Changed = changed
             };
 
             var dictSelf = new Dictionary<object, int>(); // item, count
@@ -575,35 +580,50 @@ namespace Mixins
             }
 
             // added to self
-            foreach (var pair in dictSelf)
+            GetDiff(dictSelf, dictOther, added);
+
+            // deleted from self
+            GetDiff(dictOther, dictSelf, removed);
+
+            // все что не аддед проверить на IsChanged
+            foreach (var item in self)
+            {
+                if (!added.Contains(item) && item is MChangeTracking)
+                {
+                    var mct = (MChangeTracking)item;
+                    if(mct.IsChanged) changed.Add(item);
+                }
+            }
+
+            return result;
+        }
+
+        private static void GetDiff(Dictionary<object, int> current, Dictionary<object, int> old, List<object> diff)
+        {
+            foreach (var pair in current)
             {
                 // not there
-                if(!dictOther.ContainsKey(pair.Key))
+                if (!old.ContainsKey(pair.Key))
                 {
                     for (var i = 0; i < pair.Value; i++)
                     {
-                        added.Add(pair.Key);
+                        diff.Add(pair.Key);
                     }
                 }
                 // partially there
-                if (dictOther.ContainsKey(pair.Key))
+                else
                 {
-                    var newItems = pair.Value - dictOther[pair.Key];
+                    var newItems = pair.Value - old[pair.Key];
                     if (newItems > 0)
                     {
                         for (var i = 0; i < newItems; i++)
                         {
-                            added.Add(pair.Key);
+                            diff.Add(pair.Key);
                         }
                     }
                 }
             }
-
-
-
-            return result;
-        } 
-
+        }
     }
 
 
