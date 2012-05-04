@@ -341,17 +341,39 @@ namespace Mixins
             foreach (var prop in state)
             {
                 var incc = prop.Value as INotifyCollectionChanged;
-                if(incc == null) continue;
+                if (incc == null) continue;
                 var name = prop.Key;
                 var list = (ICollection)prop.Value;
                 var trackableList = list.AsQueryable().OfType<MChangeTracking>().ToList();
                 shapshots[name] = new ArrayList(list); // snapshots elements are the same as on real list!
                 incc.CollectionChanged += (sender, args) => OnListChanged(sender, args, self, name);
-                trackableList.ForEach(c => c.StartTrackingChanges());
+                trackableList.ForEach(item =>
+                {
+                    var mnsc = item as MNotifyStateChange;
+                    if (mnsc != null)
+                    {
+                        // todo: use only MChangeTracking interception pipeline?
+                        mnsc.PropertyChanged += (sender, args) => OnItemChanged(sender, args, self, name);
+                    }
+                    item.StartTrackingChanges();
+                });
 		    }
         }
 
-        public static void OnListChanged(object list, NotifyCollectionChangedEventArgs eventArgs, MChangeTracking self, string propertyName)
+        internal static void OnItemChanged(object item, PropertyChangedEventArgs eventArgs, MChangeTracking parent, string listName)
+	    {
+            if (eventArgs.PropertyName != IsChanged) return;
+            parent.EvaluateIsChanged();
+            // item is changed => fire list property changed on parent
+            var mnsc = parent as MNotifyStateChange;
+            if (mnsc != null)
+            {
+                mnsc.RaisePropertyChanged(listName);
+                mnsc.RaisePropertyChanged(IsChanged);
+            }
+        }
+
+	    internal static void OnListChanged(object list, NotifyCollectionChangedEventArgs eventArgs, MChangeTracking self, string propertyName)
         {
             // if list differs from snapshot, raise IsChanged, raise INPC with list name
             var collection = list as ICollection;
@@ -424,17 +446,44 @@ namespace Mixins
 		{
 			if (self.DontTrackChanges() || name == IsChanged) return;
 			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
-			// todo: lists
             var change = (ValueChange)changes[name];
-			if (Equals(change.OldValue, value))
-			{
-				changes.Remove(name);
-				if (changes.Count == 0) self.SetProperty(IsChanged, false); // reset if all changes are reverted
-				return;
-			}
-			change.NewValue = value;
-			self.SetProperty(IsChanged, true); 
+            if (Equals(change.OldValue, value))
+            {
+                changes.Remove(name);
+            }
+            else
+            {
+                change.NewValue = value;
+            }
+		    self.EvaluateIsChanged();
 		}
+
+        internal static void EvaluateIsChanged(this MChangeTracking self)
+        {
+            // any lists has any changes? // todo: check added, deleted
+            var state = self.GetPublicState();
+
+            var listsChanged = false;
+            foreach (var prop in state)
+            {
+                var incc = prop.Value as INotifyCollectionChanged;
+                if (incc == null) continue;
+                var name = prop.Key;
+                var list = (ICollection) prop.Value;
+                // bug: use snapshots here
+                var trackableList = list.AsQueryable().OfType<MChangeTracking>().ToList();
+                if(trackableList.Any(c=>c.IsChanged))
+                {
+                    listsChanged = true;
+                    break;
+                }
+            }
+
+            var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
+            var isChanged = changes.Count > 0 || listsChanged;
+            self.SetProperty(IsChanged, isChanged); 
+        }
+
 
 		#endregion
 

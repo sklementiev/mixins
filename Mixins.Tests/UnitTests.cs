@@ -287,5 +287,21 @@ namespace Mixins.Tests
             Assert.AreEqual(4, listChangedRaisedTimes);
         }
 
+        [TestMethod]
+        public void ChangingCollectionItemChangeParentState()
+        {
+            Person.Friends = new ObservableCollection<Person>
+            {
+                new Person { FirstName = "Sergey", LastName = "Brin" },
+            };
+
+            Person.StartTrackingChanges();
+            var friend = Person.Friends[0];
+            var oldName = friend.FirstName;
+            friend.FirstName = "Alex";
+            Assert.IsTrue(Person.IsChanged);
+            friend.FirstName = oldName;
+            Assert.IsFalse(Person.IsChanged);
+        }
 	}
 }
