@@ -20,9 +20,6 @@ namespace Mixins.Tests
 			    FirstName = "Bill",
 				LastName = "Klingon",
 				DateOfBirth = DateTime.Parse("11/11/11"),
-                //Friends = new List<Person> { 
-                //    new Person { FirstName = "Freda", LastName = "Friend" }, 
-                //    new Person { FirstName = "Joe", LastName = "Doe" }}
 			};
 		}
 
@@ -237,11 +234,8 @@ namespace Mixins.Tests
             var changedRaisedTimes = 0;
             var listChangedRaisedTimes = 0;
 
-            Person.Friends = new ObservableCollection<Person>
-            {
-                new Person { FirstName = "Liz", LastName = "Tayler" },
-                new Person { FirstName = "Liv", LastName = "Tayler" }
-            };
+            Person.Friends.Add(new Person { FirstName = "Liz", LastName = "Tayler" });
+            Person.Friends.Add(new Person { FirstName = "Big", LastName = "Trailer" });
 
             Person.OnPropertyChanged(c => c.IsChanged, s =>
             {
@@ -282,6 +276,9 @@ namespace Mixins.Tests
             Person.Friends[Person.Friends.Count() - 1].LastName = "Murray";
             changes = Person.GetChanges();
             change = changes["Friends"] as CollectionChange;
+            Assert.IsTrue(change.Added.Count == 0);
+            Assert.IsTrue(change.Removed.Count == 1);
+            Assert.IsTrue(change.Changed.Count == 1);
 
             Assert.AreEqual(4, changedRaisedTimes);
             Assert.AreEqual(4, listChangedRaisedTimes);
@@ -290,18 +287,37 @@ namespace Mixins.Tests
         [TestMethod]
         public void ChangingCollectionItemChangeParentState()
         {
-            Person.Friends = new ObservableCollection<Person>
-            {
-                new Person { FirstName = "Sergey", LastName = "Brin" },
-            };
-
+            Person.Friends.Add(new Person {FirstName = "Sergey", LastName = "Brin"});
             Person.StartTrackingChanges();
             var friend = Person.Friends[0];
             var oldName = friend.FirstName;
             friend.FirstName = "Alex";
             Assert.IsTrue(Person.IsChanged);
+            Assert.IsTrue(friend.IsChanged);
             friend.FirstName = oldName;
             Assert.IsFalse(Person.IsChanged);
+            Assert.IsFalse(friend.IsChanged);
         }
-	}
+
+        [TestMethod]
+        public void ListItemChangesBubbleUpToParent()
+        {
+            Person.FirstName = "Parent";
+            var child = new Person { FirstName = "Child" };
+            child.Friends.Add(new Person { FirstName = "Grandchild" });
+            Person.Friends.Add(child);
+
+            Person.StartTrackingChanges();
+            var friendOfFriend = Person.Friends[0].Friends[0];
+            var oldName = friendOfFriend.FirstName;
+            friendOfFriend.FirstName = "New";
+            Assert.IsTrue(Person.IsChanged);
+            Assert.IsTrue(friendOfFriend.IsChanged);
+            friendOfFriend.FirstName = oldName;
+            Assert.IsFalse(Person.IsChanged);
+            Assert.IsFalse(friendOfFriend.IsChanged);
+        }
+
+    
+    }
 }

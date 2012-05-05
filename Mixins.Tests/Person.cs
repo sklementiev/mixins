@@ -9,9 +9,11 @@ namespace Mixins.Tests
 	{
 		public Person()
 		{
-			this.NotifyOnChange(() => FullName, 
+            Friends = new ObservableCollection<Person>();
+            this.NotifyOnChange(() => FullName, 
 				() => FirstName, () => LastName);
-		}
+        }
+
 
 		public string FirstName
 		{
@@ -39,7 +41,7 @@ namespace Mixins.Tests
         public ObservableCollection<Person> Friends
         {
             get { return this.GetProperty(() => Friends); }
-            set { this.SetProperty(() => Friends, value); }
+            private set { this.SetProperty(() => Friends, value); }
         }
 
 		public event PropertyChangingEventHandler PropertyChanging;

@@ -221,7 +221,9 @@ namespace Mixins
 			var properties = self.GetPublicState();
 			var clonedProperties = properties.Keys.ToDictionary(key => key, key => properties[key]);
 			var clone = Activator.CreateInstance(self.GetType());
-			State.Add(clone, clonedProperties);
+            // todo: may contain lists - clean state
+		    State.Remove(clone); // ctor could store some state already
+            State.Add(clone, clonedProperties);
 			return (T)clone;
 		}
 
