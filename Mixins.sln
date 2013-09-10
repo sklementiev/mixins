@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mixins", "Mixins\Mixins.csproj", "{FACE18CC-8B97-4121-9E2F-B8390B90ECF9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MixinsConsole", "MixinsConsole\MixinsConsole.csproj", "{9F81699F-6732-4727-9630-66A7710F6CCD}"
@@ -8,13 +8,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfConsole", "WpfConsole\WpfConsole.csproj", "{AC272B06-C262-4819-99A7-4183E9EEAAAA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mixins.Tests", "Mixins.Tests\Mixins.Tests.csproj", "{A11444C7-165C-4627-9716-479B4CEBCFA5}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BE5F2340-66E3-4647-9E02-1708F3B84A3E}"
-	ProjectSection(SolutionItems) = preProject
-		Local.testsettings = Local.testsettings
-		Mixins.vsmdi = Mixins.vsmdi
-		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
