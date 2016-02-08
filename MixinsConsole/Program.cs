@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Mixins;
@@ -17,20 +16,22 @@ namespace Mixins
 	public interface MCanScratch : Mixin { }
 	
 	// extensible behaviour/state
-	public static partial class Extensions
+	public static class Extensions
 	{
 		// mixin specific behaviour
 		public static void Bark(this MCanBark self)
 		{
 			var name = "unknown thing";
-			if (self is IHasName) name = (self as IHasName).Name;
+		    var hasName = self as IHasName;
+		    if (hasName != null) name = hasName.Name;
 			Console.WriteLine(name + " Barked");
 		}
 
 		public static void Scratch(this MCanScratch self)
 		{
 			var name = "unknown thing";
-			if (self is IHasName) name = (self as IHasName).Name;
+		    var hasName = self as IHasName;
+		    if (hasName != null) name = hasName.Name;
 			Console.WriteLine(name + " Scratched ");
 		}
 	}
@@ -45,19 +46,18 @@ namespace MixinsExample
 		MNotifyStateChange, 
 		MEditableObject,
 		MEquatable,
-		MDisposable,
-		MChangeTracking
+		MDisposable
 	{
 		public string Name
 		{
-			get { return this.GetProperty(() => Name); }
-			set { this.SetProperty(() => Name, value); }
+		    get { return this.GetValue(); }
+			set { this.SetValue(value); }
 		}
 
 		public DateTime? DateOfBirth
 		{
-			get { return this.GetProperty(() => DateOfBirth); }
-			set { this.SetProperty(() => DateOfBirth, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
 		}
 
 		public event PropertyChangingEventHandler PropertyChanging;
@@ -90,7 +90,7 @@ namespace MixinsExample
 
 		public bool IsChanged
 		{
-			get { return this.GetProperty(() => IsChanged); }
+			get { return this.GetValue(); }
 		}
 	}
 
@@ -99,58 +99,42 @@ namespace MixinsExample
 		static void Main()
 		{
 			var creature = new Creature { Name = "Rusty", DateOfBirth = DateTime.Now };
+            creature.DumpState();
 			creature.Bark();
 			creature.Scratch();
-			creature.DumpState();
 
-			Console.WriteLine("=> Start Tracking Changes");
-			creature.StartTrackingChanges();
-			creature.PropertyChanging += (sender, eventArgs)
-				=> Console.Write("Property [{0}] is changing from [{1}] ", eventArgs.PropertyName, ((Mixin)sender).GetProperty(eventArgs.PropertyName));
-			creature.PropertyChanged += (sender, eventArgs)
-				=> Console.WriteLine("to [{0}]", ((Mixin)sender).GetProperty(eventArgs.PropertyName));
+            Console.WriteLine("# State changes - notification");
+            creature.PropertyChanging += (sender, eventArgs)
+                => Console.Write("{0} : {1} -> ", eventArgs.PropertyName, ((Mixin)sender).GetProperty(eventArgs.PropertyName));
+            creature.PropertyChanged += (sender, eventArgs)
+                => Console.WriteLine("{0}", ((Mixin)sender).GetProperty(eventArgs.PropertyName));
+            creature.Name = "Bob";
+            creature.DumpState();
 
-			creature.Name = "Any other name";
-			creature.Name = "Rusty"; // should reset IsChanges
-			creature.Name = "Dusty";
-			creature.DateOfBirth = creature.DateOfBirth; // not an actual "change"
-			creature.DumpState();
-			
-			var changes = creature.GetChanges();
-			Debug.Assert(changes.Count == 1);
-            //Debug.Assert(changes["Name"].OldValue.ToString() == "Rusty");
-            //Debug.Assert(changes["Name"].NewValue.ToString() == "Dusty");
-			
-			Console.WriteLine("=> Reject Changes");
-			creature.RejectChanges();
-			creature.DumpState();
+            Console.WriteLine("# MEditableObject");
+            creature.BeginEdit();
+            creature.Name = "Kevin";
+            creature.DateOfBirth = DateTime.Parse("11/11/11");
+            creature.DumpState();
+            creature.CancelEdit();
+            Console.WriteLine("# CancelEdit");
+            creature.DumpState();
 
-			Console.WriteLine("=> MCloneable, MEquatable");
+			Console.WriteLine("# MCloneable, MEquatable");
 			Console.WriteLine("Clone the creature!");
 			var clone = creature.Clone();
 			Trace.Assert(clone.Equals(creature));
 			Console.WriteLine("Clone is the same as the original!");
 
-			clone.PropertyChanging += (sender, eventArgs)
-				=> Console.Write("Property [{0}] is changing from [{1}] ", eventArgs.PropertyName, ((Mixin) sender).GetProperty(eventArgs.PropertyName));
+            clone.PropertyChanging += (sender, eventArgs)
+                => Console.Write("{0} : {1} -> ", eventArgs.PropertyName, ((Mixin)sender).GetProperty(eventArgs.PropertyName));
+            clone.PropertyChanged += (sender, eventArgs)
+                => Console.WriteLine("{0}", ((Mixin)sender).GetProperty(eventArgs.PropertyName));
 
-			clone.PropertyChanged += (sender, eventArgs)
-				=> Console.WriteLine("to [{0}]", ((Mixin) sender).GetProperty(eventArgs.PropertyName));
-
-			clone.Name = "Cloned Rusty";
+			clone.Name = "Stuart";
 			clone.DumpState();
 
-			Console.WriteLine("=> BeginEdit");
-			clone.BeginEdit();
-			clone.Name = "Rusty 2";
-			clone.DateOfBirth = DateTime.Now;
-			clone.DumpState();
-			clone.CancelEdit();
-			Console.WriteLine("=> CancelEdit");
-
-			clone.DumpState();
-
-			Console.WriteLine("=> OnDispose attached");
+			Console.WriteLine("# OnDispose attached");
 			clone.OnDispose(c => Console.WriteLine("{0} is disposed!", c.Name));
 			clone.DumpState();
 

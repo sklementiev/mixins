@@ -4,7 +4,7 @@ using Mixins;
 
 namespace WpfConsole
 {
-	public class Person : Mixin, MNotifyStateChange, MChangeTracking
+	public class Person : MNotifyStateChange, MChangeTracking
 	{
 		public Person()
 		{
@@ -14,15 +14,15 @@ namespace WpfConsole
 
 		public string FirstName
 		{
-			get { return this.GetProperty(() => FirstName); }
-			set { this.SetProperty(() => FirstName, value); }
+			get { return this.GetValue(); }
+			set { this.SetValue(value); }
 		}
 
 		public string LastName
 		{
-			get { return this.GetProperty(() => LastName); }
-			set { this.SetProperty(() => LastName, value); }
-		}
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
 
 		public string FullName
 		{
@@ -31,16 +31,16 @@ namespace WpfConsole
 
 		public DateTime? DateOfBirth
 		{
-			get { return this.GetProperty(() => DateOfBirth); }
-			set { this.SetProperty(() => DateOfBirth, value); }
-		}
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
 
 		public event PropertyChangingEventHandler PropertyChanging;
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		public bool IsChanged
 		{
-			get { return this.GetProperty(() => IsChanged); }
+			get { return this.GetValue(); }
 		}
 	}
 }

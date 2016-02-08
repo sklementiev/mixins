@@ -1,40 +1,61 @@
-﻿using System;
-using System.Collections;
+﻿//
+// use Microsoft BCL Portability Pack if targeting .NET 4.0
+// Install-Package Microsoft.Bcl
+//
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
+using System.Runtime.CompilerServices;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 
 namespace Mixins
 {
-	public interface Mixin { } 
-	
-	public interface MCloneable : Mixin { } // type safe version of ICloneable
-	public interface MDisposable : Mixin { } // we can attach custom action on dispose
-	public interface MNotifyStateChange : Mixin, INotifyPropertyChanging, INotifyPropertyChanged { } // mixin can aggregate/extend standart interfaces
-	public interface MEditableObject : Mixin, IEditableObject { } // another example of implementing standart interfaces
-	public interface MEquatable : Mixin, IEquatable<MEquatable> { } // we can compare mixins by value
-	public interface MChangeTracking : Mixin // our version of IRevertibleChangeTracking
-	{
-		bool IsChanged { get; }
-	}
-    public interface MMapper : Mixin { } // transfer data between mixins using convention (same property names and data types)
-	public interface MComposite : Mixin { } //TODO define composite structure for complex object graphs
+	public interface Mixin { }
 
-	public static partial class Extensions
+    // mixin can aggregate/extend standart interfaces
+    public interface MNotifyStateChange : Mixin, INotifyPropertyChanging, INotifyPropertyChanged { }
+
+    // another example of implementing standart interfaces
+    public interface MEditableObject : MCloneable, IEditableObject { } 
+
+    // our version of IRevertibleChangeTracking
+    public interface MChangeTracking : MNotifyStateChange 
+    {
+        bool IsChanged { get; }
+    }
+
+    public interface MCloneable : Mixin { } // type safe version of ICloneable
+	
+    public interface MDisposable : Mixin { } // we can attach custom action on dispose
+
+    public interface MEquatable : Mixin, IEquatable<MEquatable> { } // we can compare mixins by value
+
+    public interface MMapper : Mixin { } // transfer data between mixins using convention (same property names and data types)
+	
+    public interface MComposite : Mixin { } //TODO define composite structure for complex object graphs
+
+	public static class Extensions
 	{
 		#region	Mixin
 
 		private static readonly ConditionalWeakTable<object, Dictionary<string, object>> State = new ConditionalWeakTable<object, Dictionary<string, object>>();
 
-		public static object GetProperty(this Mixin self, string name)
-		{
-			return self.GetPropertyInternal(name);
-		}
+        public static object GetProperty(this Mixin self, string name)
+        {
+            return self.GetPropertyInternal(name);
+        }
+
+        public static dynamic GetValue(this Mixin self, [CallerMemberName] string name = null)
+        {
+            return self.GetPropertyInternal(name);
+        }
+
+        public static void SetValue(this Mixin self, object value, [CallerMemberName] string name = null)
+        {
+            self.SetProperty(name, value);
+        }
 
 		public static T GetProperty<T>(this Mixin self, Expression<Func<T>> property)
 		{
@@ -62,9 +83,11 @@ namespace Mixins
 			return State.GetOrCreateValue(self);
 		}
 
+	    internal const char SystemFieldPrefix = '#';
+
 		internal static Dictionary<string, object> GetPublicState(this Mixin self)
 		{
-			return self.GetStateInternal().Where(c => c.Key.First() != '!').ToDictionary(c => c.Key, c => c.Value); 
+            return self.GetStateInternal().Where(c => c.Key.First() != SystemFieldPrefix).ToDictionary(c => c.Key, c => c.Value); 
 		}
 
 		internal static void SetPropertyInternal(this Mixin self, string name, object value)
@@ -87,12 +110,6 @@ namespace Mixins
 			{
 				StateChanging(notifyStateChange, name, value);
 			}
-			var changeTracking = self as MChangeTracking;
-			if (changeTracking != null)
-			{
-				StateChanging(changeTracking, name, value);
-			}
-
             return value;
 		}
 
@@ -103,20 +120,15 @@ namespace Mixins
 			{
 				StateChanged(notifyStateChange, name, value);
 			}
-			var changeTracking = self as MChangeTracking;
-			if (changeTracking != null)
-			{
-				StateChanged(changeTracking, name, value);
-			}
 		}
 
 		public static void DumpState(this Mixin self)
 		{
 			var properties = self.GetStateInternal();
 			Console.WriteLine("=========================================================================================================");
-			foreach (var propertyName in properties.Keys)
+			foreach (var propertyName in properties.Keys.OrderBy(c => c))
 			{
-				Console.WriteLine(string.Format("{0,-50}{1}", propertyName, properties[propertyName]));
+				Console.WriteLine("{0,-50}{1}", propertyName, properties[propertyName]);
 			}
 			Console.WriteLine("=========================================================================================================");
 		}
@@ -216,12 +228,12 @@ namespace Mixins
 		#region	MCloneable
 
 		// simple implementation of shallow clone
+        // TODO: deep clone
 		public static T Clone<T>(this T self) where T : Mixin
 		{
 			var properties = self.GetPublicState();
 			var clonedProperties = properties.Keys.ToDictionary(key => key, key => properties[key]);
 			var clone = Activator.CreateInstance(self.GetType());
-            // todo: may contain lists - clean state
 		    State.Remove(clone); // ctor could store some state already
             State.Add(clone, clonedProperties);
 			return (T)clone;
@@ -231,7 +243,7 @@ namespace Mixins
 
 		#region	MEditableObject
 
-		private const string TemporaryState = "!temp";
+		private const string TemporaryState = "#clone";
 		
 		public static void BeginEdit(this MEditableObject self)
 		{
@@ -301,7 +313,7 @@ namespace Mixins
 			}
 		}
 
-		private const string LifetimeState = "!lifetime";
+		private const string LifetimeState = "#lifetime";
 
 		public static void OnDispose<T>(this T self, Action<T> action) where T : MDisposable 
 		{
@@ -321,171 +333,170 @@ namespace Mixins
 
 		#region	MChangeTracking
 
-		private const string IsTrackingChanges = "!isTrackingChanges";
-		private const string Changes = "!changes";
-        private const string Shapshots = "!shapshots";
-        private const string IsChanged = "IsChanged";
+        //private const string IsTrackingChanges = "#isTrackingChanges";
+        //private const string Changes = "#changes";
+        //private const string Shapshots = "#shapshots";
+        //private const string IsChanged = "IsChanged";
 
-		public static void StartTrackingChanges(this MChangeTracking self)
-		{
-            if (!self.DontTrackChanges()) return;
+        //public static void StartTrackingChanges(this MChangeTracking self)
+        //{
+        //    if (!self.DontTrackChanges()) return;
 
-            self.SetPropertyInternal(IsTrackingChanges, true);
-			self.SetPropertyInternal(IsChanged, false);
-			self.SetPropertyInternal(Changes, new Dictionary<string, Change>());
-            // todo : recursion
+        //    self.SetPropertyInternal(IsTrackingChanges, true);
+        //    self.SetPropertyInternal(IsChanged, false);
+        //    self.SetPropertyInternal(Changes, new Dictionary<string, Change>());
+        //    // todo : recursion
 
-            var shapshots = new Dictionary<string, ArrayList>();
-            self.SetPropertyInternal(Shapshots, shapshots);
+        //    var shapshots = new Dictionary<string, ArrayList>();
+        //    self.SetPropertyInternal(Shapshots, shapshots);
             
-            // Subscribe to all props with INotifyCollectionChanged there, make shapshot of elements
-		    var state = self.GetPublicState();
-            foreach (var prop in state)
-            {
-                var incc = prop.Value as INotifyCollectionChanged;
-                if (incc == null) continue;
-                var name = prop.Key;
-                var list = (ICollection)prop.Value;
-                var trackableList = list.AsQueryable().OfType<MChangeTracking>().ToList();
-                shapshots[name] = new ArrayList(list); // snapshots elements are the same as on real list!
-                incc.CollectionChanged += (sender, args) => OnListChanged(sender, args, self, name);
-                trackableList.ForEach(item =>
-                {
-                    var mnsc = item as MNotifyStateChange;
-                    if (mnsc != null)
-                    {
-                        // todo: use only MChangeTracking interception pipeline?
-                        mnsc.PropertyChanged += (sender, args) => OnItemChanged(sender, args, self, name);
-                    }
-                    item.StartTrackingChanges();
-                });
-		    }
-        }
+        //    // Subscribe to all props with INotifyCollectionChanged there, make shapshot of elements
+        //    var state = self.GetPublicState();
+        //    foreach (var prop in state)
+        //    {
+        //        var incc = prop.Value as INotifyCollectionChanged;
+        //        if (incc == null) continue;
+        //        var name = prop.Key;
+        //        var list = (ICollection)prop.Value;
+        //        var trackableList = list.AsQueryable().OfType<MChangeTracking>().ToList();
+        //        shapshots[name] = new ArrayList(list); // snapshots elements are the same as on real list!
+        //        incc.CollectionChanged += (sender, args) => OnListChanged(sender, args, self, name);
+        //        trackableList.ForEach(item =>
+        //        {
+        //            var mnsc = item as MNotifyStateChange;
+        //            if (mnsc != null)
+        //            {
+        //                // todo: use only MChangeTracking interception pipeline?
+        //                mnsc.PropertyChanged += (sender, args) => OnItemChanged(sender, args, self, name);
+        //            }
+        //            item.StartTrackingChanges();
+        //        });
+        //    }
+        //}
 
-        internal static void OnItemChanged(object item, PropertyChangedEventArgs eventArgs, MChangeTracking parent, string listName)
-	    {
-            if (eventArgs.PropertyName != IsChanged) return;
-            parent.EvaluateIsChanged();
-            // item is changed => fire list property changed on parent
-            var mnsc = parent as MNotifyStateChange;
-            if (mnsc != null)
-            {
-                mnsc.RaisePropertyChanged(listName);
-                mnsc.RaisePropertyChanged(IsChanged);
-            }
-        }
+        //internal static void OnItemChanged(object item, PropertyChangedEventArgs eventArgs, MChangeTracking parent, string listName)
+        //{
+        //    if (eventArgs.PropertyName != IsChanged) return;
+        //    parent.EvaluateIsChanged();
+        //    // item is changed => fire list property changed on parent
+        //    var mnsc = parent as MNotifyStateChange;
+        //    if (mnsc != null)
+        //    {
+        //        mnsc.RaisePropertyChanged(listName);
+        //        mnsc.RaisePropertyChanged(IsChanged);
+        //    }
+        //}
 
-	    internal static void OnListChanged(object list, NotifyCollectionChangedEventArgs eventArgs, MChangeTracking self, string propertyName)
-        {
-            // if list differs from snapshot, raise IsChanged, raise INPC with list name
-            var collection = list as ICollection;
-            var shapshot = ((Dictionary<string, ArrayList>)self.GetPropertyInternal(Shapshots))[propertyName];
-            self.SetProperty(IsChanged, !collection.EqualsTo(shapshot));
-            (self as MNotifyStateChange).RaisePropertyChanged(propertyName); 
-            // todo: getchanges() should calculate list diffs on request
-        }
+        //internal static void OnListChanged(object list, NotifyCollectionChangedEventArgs eventArgs, MChangeTracking self, string propertyName)
+        //{
+        //    // if list differs from snapshot, raise IsChanged, raise INPC with list name
+        //    var collection = list as ICollection;
+        //    var shapshot = ((Dictionary<string, ArrayList>)self.GetPropertyInternal(Shapshots))[propertyName];
+        //    self.SetProperty(IsChanged, !collection.EqualsTo(shapshot));
+        //    (self as MNotifyStateChange).RaisePropertyChanged(propertyName); 
+        //    // todo: getchanges() should calculate list diffs on request
+        //}
 
-		public static void AcceptChanges(this MChangeTracking self)
-		{
-			if (self.DontTrackChanges()) return;
-			ClearTrackingState(self);
-		}
+        //public static void AcceptChanges(this MChangeTracking self)
+        //{
+        //    if (self.DontTrackChanges()) return;
+        //    ClearTrackingState(self);
+        //}
 
-		public static void RejectChanges(this MChangeTracking self)
-		{
-			if (self.DontTrackChanges()) return;
-            // TODO. Lists
-			var changes = ((Dictionary<string, Change>)self.GetPropertyInternal(Changes))
-				.Where(c => c.Value is ValueChange)
-                .Select(c => new { Property = c.Key, ((ValueChange)c.Value).OldValue }).ToArray();
-			foreach (var change in changes)
-			{
-				self.SetProperty(change.Property, change.OldValue);
-			}
-			self.SetProperty(IsChanged, false);
-			ClearTrackingState(self);
-		}
+        //public static void RejectChanges(this MChangeTracking self)
+        //{
+        //    if (self.DontTrackChanges()) return;
+        //    // TODO. Lists
+        //    var changes = ((Dictionary<string, Change>)self.GetPropertyInternal(Changes))
+        //        .Where(c => c.Value is ValueChange)
+        //        .Select(c => new { Property = c.Key, ((ValueChange)c.Value).OldValue }).ToArray();
+        //    foreach (var change in changes)
+        //    {
+        //        self.SetProperty(change.Property, change.OldValue);
+        //    }
+        //    self.SetProperty(IsChanged, false);
+        //    ClearTrackingState(self);
+        //}
 
-		private static void ClearTrackingState(MChangeTracking self)
-		{
-			var state = self.GetStateInternal();
-			state.Remove(IsChanged);
-			state.Remove(IsTrackingChanges);
-			state.Remove(Changes);
-            state.Remove(Shapshots);
-		}
+        //private static void ClearTrackingState(MChangeTracking self)
+        //{
+        //    var state = self.GetStateInternal();
+        //    state.Remove(IsChanged);
+        //    state.Remove(IsTrackingChanges);
+        //    state.Remove(Changes);
+        //    state.Remove(Shapshots);
+        //}
 
-		public static Dictionary<string, Change> GetChanges(this MChangeTracking self)
-		{
-            var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
-            var result = new Dictionary<string, Change>(changes);
-            var snapshots = (Dictionary<string, ArrayList>)self.GetPropertyInternal(Shapshots);
-		    foreach (var shapshot in snapshots)
-		    {
-		        var list = self.GetPropertyInternal(shapshot.Key) as ICollection;
-                var diff = list.GetDiff(shapshot.Value);
-                if (diff.Added.Count > 0 || diff.Removed.Count > 0 || diff.Changed.Count > 0) result.Add(shapshot.Key, diff);
-		    }
+        //public static Dictionary<string, Change> GetChanges(this MChangeTracking self)
+        //{
+        //    var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
+        //    var result = new Dictionary<string, Change>(changes);
+        //    var snapshots = (Dictionary<string, ArrayList>)self.GetPropertyInternal(Shapshots);
+        //    foreach (var shapshot in snapshots)
+        //    {
+        //        var list = self.GetPropertyInternal(shapshot.Key) as ICollection;
+        //        var diff = list.GetDiff(shapshot.Value);
+        //        if (diff.Added.Count > 0 || diff.Removed.Count > 0 || diff.Changed.Count > 0) result.Add(shapshot.Key, diff);
+        //    }
 
-            return result;
-		}
+        //    return result;
+        //}
 
-		private static bool DontTrackChanges(this MChangeTracking self)
-		{
-			var isTrackingChanges = self.GetProperty(IsTrackingChanges);
-			return (isTrackingChanges == null || !(bool) isTrackingChanges);
-		}
+        //private static bool DontTrackChanges(this MChangeTracking self)
+        //{
+        //    var isTrackingChanges = self.GetProperty(IsTrackingChanges);
+        //    return (isTrackingChanges == null || !(bool) isTrackingChanges);
+        //}
 
-		private static void StateChanging(MChangeTracking self, string name, object value)
-		{
-			if (self.DontTrackChanges() || name == IsChanged) return;
-			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
-			if(changes.ContainsKey(name)) return;
-            changes.Add(name, new ValueChange { OldValue = self.GetProperty(name) });
-		}
+        //private static void StateChanging(MChangeTracking self, string name, object value)
+        //{
+        //    if (self.DontTrackChanges() || name == IsChanged) return;
+        //    var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
+        //    if(changes.ContainsKey(name)) return;
+        //    changes.Add(name, new ValueChange { OldValue = self.GetProperty(name) });
+        //}
 
-		private static void StateChanged(MChangeTracking self, string name, object value)
-		{
-			if (self.DontTrackChanges() || name == IsChanged) return;
-			var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
-            var change = (ValueChange)changes[name];
-            if (Equals(change.OldValue, value))
-            {
-                changes.Remove(name);
-            }
-            else
-            {
-                change.NewValue = value;
-            }
-		    self.EvaluateIsChanged();
-		}
+        //private static void StateChanged(MChangeTracking self, string name, object value)
+        //{
+        //    if (self.DontTrackChanges() || name == IsChanged) return;
+        //    var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
+        //    var change = (ValueChange)changes[name];
+        //    if (Equals(change.OldValue, value))
+        //    {
+        //        changes.Remove(name);
+        //    }
+        //    else
+        //    {
+        //        change.NewValue = value;
+        //    }
+        //    self.EvaluateIsChanged();
+        //}
 
-        internal static void EvaluateIsChanged(this MChangeTracking self)
-        {
-            // any lists has any changes? // todo: check added, deleted
-            var state = self.GetPublicState();
+        //internal static void EvaluateIsChanged(this MChangeTracking self)
+        //{
+        //    // any lists has any changes? // todo: check added, deleted
+        //    var state = self.GetPublicState();
 
-            var listsChanged = false;
-            foreach (var prop in state)
-            {
-                var incc = prop.Value as INotifyCollectionChanged;
-                if (incc == null) continue;
-                var name = prop.Key;
-                var list = (ICollection) prop.Value;
-                // bug: use snapshots here
-                var trackableList = list.AsQueryable().OfType<MChangeTracking>().ToList();
-                if(trackableList.Any(c=>c.IsChanged))
-                {
-                    listsChanged = true;
-                    break;
-                }
-            }
+        //    var listsChanged = false;
+        //    foreach (var prop in state)
+        //    {
+        //        var incc = prop.Value as INotifyCollectionChanged;
+        //        if (incc == null) continue;
+        //        var name = prop.Key;
+        //        var list = (ICollection) prop.Value;
+        //        // bug: use snapshots here
+        //        var trackableList = list.AsQueryable().OfType<MChangeTracking>().ToList();
+        //        if(trackableList.Any(c=>c.IsChanged))
+        //        {
+        //            listsChanged = true;
+        //            break;
+        //        }
+        //    }
 
-            var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
-            var isChanged = changes.Count > 0 || listsChanged;
-            self.SetProperty(IsChanged, isChanged); 
-        }
-
+        //    var changes = (Dictionary<string, Change>)self.GetProperty(Changes);
+        //    var isChanged = changes.Count > 0 || listsChanged;
+        //    self.SetProperty(IsChanged, isChanged); 
+        //}
 
 		#endregion
 
@@ -514,23 +525,23 @@ namespace Mixins
 	    #endregion
     }
 
-    public abstract class Change
-    {
-    }
+    //public abstract class Change
+    //{
+    //}
 
-	// ? ref changes ? how to deal with ? maybe only support Mixins
-    public class ValueChange : Change
-	{
-		public object OldValue { get; set; }
-		public object NewValue { get; set; }
-	}
+    //// ? ref changes ? how to deal with ? maybe only support Mixins
+    //public class ValueChange : Change
+    //{
+    //    public object OldValue { get; set; }
+    //    public object NewValue { get; set; }
+    //}
 
-    public class CollectionChange : Change
-    {
-        public List<object> Added { get; set; }
-        public List<object> Removed { get; set; }
-        public List<object> Changed { get; set; }
-    }
+    //public class CollectionChange : Change
+    //{
+    //    public List<object> Added { get; set; }
+    //    public List<object> Removed { get; set; }
+    //    public List<object> Changed { get; set; }
+    //}
 
 
 	#region	Utils
@@ -577,105 +588,105 @@ namespace Mixins
 		}
 	}
 
-    public static class CollectionHelper
-    {
-        // TODO: Compare based on IEquitable not refs
-        public static bool EqualsTo(this ICollection left, ICollection right)
-        {
-            if (left.Count != right.Count) return false;
+    //public static class CollectionHelper
+    //{
+    //    // TODO: Compare based on IEquitable not refs
+    //    public static bool EqualsTo(this ICollection left, ICollection right)
+    //    {
+    //        if (left.Count != right.Count) return false;
 
-            var dict = new Dictionary<object, int>();
+    //        var dict = new Dictionary<object, int>();
 
-            foreach (var member in left)
-            {
-                if (!dict.ContainsKey(member)) dict[member] = 1;
-                else dict[member]++;
-            }
+    //        foreach (var member in left)
+    //        {
+    //            if (!dict.ContainsKey(member)) dict[member] = 1;
+    //            else dict[member]++;
+    //        }
 
-            foreach (var member in right)
-            {
-                if (!dict.ContainsKey(member)) return false;
-                dict[member]--;
-            }
+    //        foreach (var member in right)
+    //        {
+    //            if (!dict.ContainsKey(member)) return false;
+    //            dict[member]--;
+    //        }
 
-            return dict.All(kvp => kvp.Value == 0);
-        }
+    //        return dict.All(kvp => kvp.Value == 0);
+    //    }
 
-        // TODO: Compare based on IEquitable not refs
-        public static CollectionChange GetDiff(this ICollection self, ICollection other)
-        {
-            var added = new List<object>();
-            var removed = new List<object>();
-            var changed = new List<object>();
-            var result = new CollectionChange
-            {
-                Added = added,
-                Removed = removed,
-                Changed = changed
-            };
+    //    // TODO: Compare based on IEquitable not refs
+    //    public static CollectionChange GetDiff(this ICollection self, ICollection other)
+    //    {
+    //        var added = new List<object>();
+    //        var removed = new List<object>();
+    //        var changed = new List<object>();
+    //        var result = new CollectionChange
+    //        {
+    //            Added = added,
+    //            Removed = removed,
+    //            Changed = changed
+    //        };
 
-            var dictSelf = new Dictionary<object, int>(); // item, count
+    //        var dictSelf = new Dictionary<object, int>(); // item, count
 
-            foreach (var item in self)
-            {
-                if (!dictSelf.ContainsKey(item)) dictSelf[item] = 1;
-                else dictSelf[item]++;
-            }
+    //        foreach (var item in self)
+    //        {
+    //            if (!dictSelf.ContainsKey(item)) dictSelf[item] = 1;
+    //            else dictSelf[item]++;
+    //        }
 
-            var dictOther = new Dictionary<object, int>(); // item, count
+    //        var dictOther = new Dictionary<object, int>(); // item, count
 
-            foreach (var item in other)
-            {
-                if (!dictOther.ContainsKey(item)) dictOther[item] = 1;
-                else dictOther[item]++;
-            }
+    //        foreach (var item in other)
+    //        {
+    //            if (!dictOther.ContainsKey(item)) dictOther[item] = 1;
+    //            else dictOther[item]++;
+    //        }
 
-            // added to self
-            GetDiff(dictSelf, dictOther, added);
+    //        // added to self
+    //        GetDiff(dictSelf, dictOther, added);
 
-            // deleted from self
-            GetDiff(dictOther, dictSelf, removed);
+    //        // deleted from self
+    //        GetDiff(dictOther, dictSelf, removed);
 
-            // все что не аддед проверить на IsChanged
-            foreach (var item in self)
-            {
-                if (!added.Contains(item) && item is MChangeTracking)
-                {
-                    var mct = (MChangeTracking)item;
-                    if(mct.IsChanged) changed.Add(item);
-                }
-            }
+    //        // все что не аддед проверить на IsChanged
+    //        foreach (var item in self)
+    //        {
+    //            if (!added.Contains(item) && item is MChangeTracking)
+    //            {
+    //                var mct = (MChangeTracking)item;
+    //                if(mct.IsChanged) changed.Add(item);
+    //            }
+    //        }
 
-            return result;
-        }
+    //        return result;
+    //    }
 
-        private static void GetDiff(Dictionary<object, int> current, Dictionary<object, int> old, List<object> diff)
-        {
-            foreach (var pair in current)
-            {
-                // not there
-                if (!old.ContainsKey(pair.Key))
-                {
-                    for (var i = 0; i < pair.Value; i++)
-                    {
-                        diff.Add(pair.Key);
-                    }
-                }
-                // partially there
-                else
-                {
-                    var newItems = pair.Value - old[pair.Key];
-                    if (newItems > 0)
-                    {
-                        for (var i = 0; i < newItems; i++)
-                        {
-                            diff.Add(pair.Key);
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //    private static void GetDiff(Dictionary<object, int> current, Dictionary<object, int> old, List<object> diff)
+    //    {
+    //        foreach (var pair in current)
+    //        {
+    //            // not there
+    //            if (!old.ContainsKey(pair.Key))
+    //            {
+    //                for (var i = 0; i < pair.Value; i++)
+    //                {
+    //                    diff.Add(pair.Key);
+    //                }
+    //            }
+    //            // partially there
+    //            else
+    //            {
+    //                var newItems = pair.Value - old[pair.Key];
+    //                if (newItems > 0)
+    //                {
+    //                    for (var i = 0; i < newItems; i++)
+    //                    {
+    //                        diff.Add(pair.Key);
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
 
 
 	#endregion	
