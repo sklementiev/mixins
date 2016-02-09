@@ -47,12 +47,22 @@ namespace Mixins.Tests
 		public event PropertyChangingEventHandler PropertyChanging;
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		public bool IsChanged
+	    public bool IsChanged
 		{
 			get { return this.GetProperty(() => IsChanged); }
 		}
 
-		public bool Equals(MEquatable other)
+        public void AcceptChanges()
+        {
+            throw new NotImplementedException();
+        }
+
+	    public void RejectChanges()
+	    {
+	        throw new NotImplementedException();
+	    }
+
+	    public bool Equals(MEquatable other)
 		{
 			return this.Equals<MEquatable>(other);
 		}

@@ -43,8 +43,7 @@ namespace MixinsExample
 		IHasName,
 		MCanScratch, 
 		MCanBark, 
-		MNotifyStateChange, 
-		MEditableObject,
+        MChangeTracking,
 		MEquatable,
 		MDisposable
 	{
@@ -88,11 +87,21 @@ namespace MixinsExample
 			return this.Equals<MEquatable>(other);
 		}
 
-		public bool IsChanged
+	    public bool IsChanged
 		{
 			get { return this.GetValue(); }
 		}
-	}
+
+        void IChangeTracking.AcceptChanges()
+        {
+            this.AcceptChanges();
+        }
+
+        void IRevertibleChangeTracking.RejectChanges()
+        {
+            this.RejectChanges();
+        }
+    }
 
 	class Program
 	{
@@ -114,6 +123,7 @@ namespace MixinsExample
             Console.WriteLine("# MEditableObject");
             creature.BeginEdit();
             creature.Name = "Kevin";
+            creature.Name = "Bob"; // IsChanged == false again!
             creature.DateOfBirth = DateTime.Parse("11/11/11");
             creature.DumpState();
             creature.CancelEdit();

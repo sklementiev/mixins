@@ -4,7 +4,7 @@ using Mixins;
 
 namespace WpfConsole
 {
-	public class Person : MNotifyStateChange, MChangeTracking
+	public class Person : MChangeTracking
 	{
 		public Person()
 		{
@@ -38,9 +38,34 @@ namespace WpfConsole
 		public event PropertyChangingEventHandler PropertyChanging;
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		public bool IsChanged
+	    public bool IsChanged
 		{
 			get { return this.GetValue(); }
 		}
+
+        void IChangeTracking.AcceptChanges()
+        {
+            this.AcceptChanges();
+        }
+
+        void IRevertibleChangeTracking.RejectChanges()
+	    {
+            this.RejectChanges();
+	    }
+
+        void IEditableObject.BeginEdit()
+	    {
+	        this.BeginEdit();
+	    }
+
+        void IEditableObject.EndEdit()
+	    {
+            this.EndEdit();
+	    }
+
+        void IEditableObject.CancelEdit()
+	    {
+            this.CancelEdit();
+	    }
 	}
 }

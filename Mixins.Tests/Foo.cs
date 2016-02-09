@@ -30,7 +30,5 @@ namespace Mixins.Tests
             get { return this.GetProperty(() => Length); }
             set { this.SetProperty(() => Length, value); }
         }
-
-
     }
 }

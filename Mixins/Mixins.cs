@@ -21,10 +21,7 @@ namespace Mixins
     public interface MEditableObject : MCloneable, IEditableObject { } 
 
     // our version of IRevertibleChangeTracking
-    public interface MChangeTracking : MNotifyStateChange 
-    {
-        bool IsChanged { get; }
-    }
+    public interface MChangeTracking : MNotifyStateChange, IRevertibleChangeTracking, MEditableObject { }
 
     public interface MCloneable : Mixin { } // type safe version of ICloneable
 	
@@ -98,7 +95,7 @@ namespace Mixins
 		internal static object GetPropertyInternal(this Mixin self, string name)
 		{
 			object value;
-			self.GetStateInternal().TryGetValue(name, out value);
+			var success = self.GetStateInternal().TryGetValue(name, out value);
 			return value;
 		}
 
@@ -143,7 +140,17 @@ namespace Mixins
 
 		private static void StateChanged(MNotifyStateChange self, string name, object value)
 		{
-			self.RaisePropertyChanged(name);
+            self.RaisePropertyChanged(name);
+            if (self is MChangeTracking && name != IsChanged && self.GetPropertyInternal(SystemFields.Shapshot) != null)
+            {
+                var wasChanged = (bool)self.GetPropertyInternal(IsChanged); 
+                var shapshot = (Mixin)self.GetPropertyInternal(SystemFields.Shapshot);
+                var isChanged = !Equals(shapshot.GetPropertyInternal(name), value);
+                if (wasChanged != isChanged)
+                {
+                    self.SetProperty(IsChanged, !wasChanged);
+                }
+            }
 		}
 
 		public static void OnPropertyChanged<T, T1>(this T self, Expression<Func<T, T1>> property, Action<T1> action) where T : MNotifyStateChange
@@ -243,34 +250,48 @@ namespace Mixins
 
 		#region	MEditableObject
 
-		private const string TemporaryState = "#clone";
-		
+		private static class SystemFields
+        {
+            public const string Shapshot = "#shapshot";
+        }
+
+	    private static void ClearIsChanged(this MEditableObject self)
+	    {
+            if (self is MChangeTracking)
+            {
+                self.SetPropertyInternal(IsChanged, false);
+            }
+	    }
+
 		public static void BeginEdit(this MEditableObject self)
 		{
-			// store current state to temporary storage
+            self.ClearIsChanged();
+            // store current state to temporary storage
 			var state = self.GetPublicState();
 			object temp;
-			if(state.TryGetValue(TemporaryState, out temp)) return; // idempotent
+			if(state.TryGetValue(SystemFields.Shapshot, out temp)) return; // idempotent
 			var clone = self.Clone<Mixin>();
-			State.GetOrCreateValue(self)[TemporaryState] = clone;
+			self.SetPropertyInternal(SystemFields.Shapshot, clone);
 		}
 
 		public static void EndEdit(this MEditableObject self)
 		{
-			// accept current state, discard old state
+            self.ClearIsChanged();
+            // accept current state, discard old state
 			var state = self.GetStateInternal();
-			state.Remove(TemporaryState);
+			state.Remove(SystemFields.Shapshot);
 		}
 
 		public static void CancelEdit(this MEditableObject self)
 		{
 			// restore state from temporary storage, discard temporary state
-			var properties = State.GetOrCreateValue(self);
+			var properties = self.GetStateInternal();
 			object clone;
-			if (!properties.TryGetValue(TemporaryState, out clone)) return; // idempotent
+			if (!properties.TryGetValue(SystemFields.Shapshot, out clone)) return; // idempotent
 			lock (self)
 			{
-				State.Remove(self);
+				// todo: copy state from snapshot
+                State.Remove(self);
 				State.Add(self, State.GetOrCreateValue(clone));
 				State.Remove(clone);
 			}
@@ -317,7 +338,7 @@ namespace Mixins
 
 		public static void OnDispose<T>(this T self, Action<T> action) where T : MDisposable 
 		{
-			var state = State.GetOrCreateValue(self);
+			var state = self.GetStateInternal();
 			object old;
 			if(state.TryGetValue(LifetimeState, out old))
 			{
@@ -333,10 +354,20 @@ namespace Mixins
 
 		#region	MChangeTracking
 
+        public static void AcceptChanges(this MChangeTracking self)
+        {
+            self.EndEdit();
+        }
+
+        public static void RejectChanges(this MChangeTracking self)
+        {
+            self.CancelEdit();
+        }
+
         //private const string IsTrackingChanges = "#isTrackingChanges";
         //private const string Changes = "#changes";
         //private const string Shapshots = "#shapshots";
-        //private const string IsChanged = "IsChanged";
+        private const string IsChanged = "IsChanged";
 
         //public static void StartTrackingChanges(this MChangeTracking self)
         //{
@@ -403,7 +434,7 @@ namespace Mixins
         //    ClearTrackingState(self);
         //}
 
-        //public static void RejectChanges(this MChangeTracking self)
+	    //public static void RejectChanges(this MChangeTracking self)
         //{
         //    if (self.DontTrackChanges()) return;
         //    // TODO. Lists

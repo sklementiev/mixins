@@ -41,20 +41,18 @@ namespace WpfConsole
 			    	Save.IsEnabled = Reset.IsEnabled = isChanged;
 			    });
 
-			//Person.StartTrackingChanges();
+			Person.BeginEdit();
 			DataContext = Person;
 		}
 
 		private void ResetClick(object sender, RoutedEventArgs e)
 		{
-            //Person.RejectChanges();
-            //Person.StartTrackingChanges();
+            Person.RejectChanges();
 		}
 
 		private void SaveClick(object sender, RoutedEventArgs e)
 		{
-            //Person.AcceptChanges();
-            //Person.StartTrackingChanges();
+            Person.AcceptChanges();
 		}
 	}
 }
