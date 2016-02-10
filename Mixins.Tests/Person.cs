@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 namespace Mixins.Tests
 {
-	public class Person : Mixin, MNotifyStateChange, MChangeTracking, MEquatable, MCloneable, MEditableObject, MComposite
+	public class Person : MChangeTracking, MEquatable
 	{
 		public Person()
 		{
@@ -14,18 +13,17 @@ namespace Mixins.Tests
 				() => FirstName, () => LastName);
         }
 
-
 		public string FirstName
 		{
-			get { return this.GetProperty(() => FirstName); }
-			set { this.SetProperty(() => FirstName, value); }
+			get { return this.GetValue(); }
+			set { this.SetValue(value); }
 		}
 
 		public string LastName
 		{
-			get { return this.GetProperty(() => LastName); }
-			set { this.SetProperty(() => LastName, value); }
-		}
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
 
 		public string FullName
 		{
@@ -34,14 +32,14 @@ namespace Mixins.Tests
 
 		public DateTime? DateOfBirth
 		{
-			get { return this.GetProperty(() => DateOfBirth); }
-			set { this.SetProperty(() => DateOfBirth, value); }
-		}
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
 
         public ObservableCollection<Person> Friends
         {
-            get { return this.GetProperty(() => Friends); }
-            private set { this.SetProperty(() => Friends, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
         }
 
 		public event PropertyChangingEventHandler PropertyChanging;
@@ -49,18 +47,18 @@ namespace Mixins.Tests
 
 	    public bool IsChanged
 		{
-			get { return this.GetProperty(() => IsChanged); }
+			get { return this.GetValue(); }
 		}
 
-        public void AcceptChanges()
+        void IChangeTracking.AcceptChanges()
         {
-            throw new NotImplementedException();
+            this.AcceptChanges();
         }
 
-	    public void RejectChanges()
-	    {
-	        throw new NotImplementedException();
-	    }
+        void IRevertibleChangeTracking.RejectChanges()
+        {
+            this.RejectChanges();
+        }
 
 	    public bool Equals(MEquatable other)
 		{
@@ -81,6 +79,5 @@ namespace Mixins.Tests
 		{
 			this.CancelEdit();
 		}
-
 	}
 }

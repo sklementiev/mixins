@@ -8,7 +8,9 @@ namespace WpfConsole
 	{
 		public Person()
 		{
-			this.NotifyOnChange(() => FullName, 
+			this.NotifyOnChange(
+                () => FullName, 
+                // depends on
 				() => FirstName, () => LastName);
 		}
 
@@ -40,7 +42,7 @@ namespace WpfConsole
 
 	    public bool IsChanged
 		{
-			get { return this.GetValue(); }
+			get { return this.GetValue() ?? false; }
 		}
 
         void IChangeTracking.AcceptChanges()
@@ -67,5 +69,10 @@ namespace WpfConsole
 	    {
             this.CancelEdit();
 	    }
-	}
+
+        public bool Equals(MEquatable other)
+        {
+            return this.Equals<MEquatable>(other);
+        }
+    }
 }

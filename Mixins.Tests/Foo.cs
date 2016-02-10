@@ -1,34 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Mixins.Tests
 {
-    public class Foo : Mixin, MMapper
+    public class Foo : MMapper
     {
         public string Name
         {
-            get { return this.GetProperty(() => Name); }
-            set { this.SetProperty(() => Name, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
         }
 
         public decimal SomeProperty
         {
-            get { return this.GetProperty(() => SomeProperty); }
-            set { this.SetProperty(() => SomeProperty, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
         }
 
         public ConsoleColor Color
         {
-            get { return this.GetProperty(() => Color); }
-            set { this.SetProperty(() => Color, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
         }
 
         public decimal Length
         {
-            get { return this.GetProperty(() => Length); }
-            set { this.SetProperty(() => Length, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
         }
     }
 }

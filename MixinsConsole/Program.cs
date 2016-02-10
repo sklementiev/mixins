@@ -1,109 +1,10 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using Mixins;
 
-namespace Mixins
+namespace MixinsConsole
 {
-	public interface IHasName
-	{
-		string Name { get; set; }
-	}
-
-	// can contain required behaviour/data
-	public interface MCanBark : Mixin { }
-
-	public interface MCanScratch : Mixin { }
-	
-	// extensible behaviour/state
-	public static class Extensions
-	{
-		// mixin specific behaviour
-		public static void Bark(this MCanBark self)
-		{
-			var name = "unknown thing";
-		    var hasName = self as IHasName;
-		    if (hasName != null) name = hasName.Name;
-			Console.WriteLine(name + " Barked");
-		}
-
-		public static void Scratch(this MCanScratch self)
-		{
-			var name = "unknown thing";
-		    var hasName = self as IHasName;
-		    if (hasName != null) name = hasName.Name;
-			Console.WriteLine(name + " Scratched ");
-		}
-	}
-}
-
-namespace MixinsExample
-{
-	public class Creature : 
-		IHasName,
-		MCanScratch, 
-		MCanBark, 
-        MChangeTracking,
-		MEquatable,
-		MDisposable
-	{
-		public string Name
-		{
-		    get { return this.GetValue(); }
-			set { this.SetValue(value); }
-		}
-
-		public DateTime? DateOfBirth
-		{
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-		}
-
-		public event PropertyChangingEventHandler PropertyChanging;
-		public event PropertyChangedEventHandler PropertyChanged;
-
-		//public void DoBar()
-		//{
-		//    this.RaisePropertyChanged("Bar");
-		//}
-
-		void IEditableObject.BeginEdit()
-		{
-			this.BeginEdit();
-		}
-
-		void IEditableObject.EndEdit()
-		{
-			this.EndEdit();
-		}
-
-		void IEditableObject.CancelEdit()
-		{
-			this.CancelEdit();
-		}
-
-		public bool Equals(MEquatable other)
-		{
-			return this.Equals<MEquatable>(other);
-		}
-
-	    public bool IsChanged
-		{
-			get { return this.GetValue(); }
-		}
-
-        void IChangeTracking.AcceptChanges()
-        {
-            this.AcceptChanges();
-        }
-
-        void IRevertibleChangeTracking.RejectChanges()
-        {
-            this.RejectChanges();
-        }
-    }
-
-	class Program
+    class Program
 	{
 		static void Main()
 		{
@@ -124,10 +25,17 @@ namespace MixinsExample
             creature.BeginEdit();
             creature.Name = "Kevin";
             creature.Name = "Bob"; // IsChanged == false again!
+            creature.Name = "Stuart";
             creature.DateOfBirth = DateTime.Parse("11/11/11");
             creature.DumpState();
-            creature.CancelEdit();
             Console.WriteLine("# CancelEdit");
+            creature.CancelEdit();
+            creature.DumpState();
+
+            creature.BeginEdit();
+            creature.Name = "Kevin";
+            Console.WriteLine("# AcceptChanges");
+            creature.AcceptChanges();
             creature.DumpState();
 
 			Console.WriteLine("# MCloneable, MEquatable");

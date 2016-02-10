@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Mixins.Tests
 {
@@ -9,27 +6,26 @@ namespace Mixins.Tests
     {
         public string Name
         {
-            get { return this.GetProperty(() => Name); }
-            set { this.SetProperty(() => Name, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
         }
 
         public int Count
         {
-            get { return this.GetProperty(() => Count); }
-            set { this.SetProperty(() => Count, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
         }
 
         public ConsoleColor Color
         {
-            get { return this.GetProperty(() => Color); }
-            set { this.SetProperty(() => Color, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
         }
 
         public string Length
         {
-            get { return this.GetProperty(() => Length); }
-            set { this.SetProperty(() => Length, value); }
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
         }
-
     }
 }

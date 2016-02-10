@@ -43,8 +43,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mixins.cs" />
+    <Compile Include="Cloneable.cs" />
+    <Compile Include="ChangeTracking.cs" />
+    <Compile Include="Disposable.cs" />
+    <Compile Include="EditableObject.cs" />
+    <Compile Include="NotifyStateChange.cs" />
+    <Compile Include="Mapper.cs" />
+    <Compile Include="Equatable.cs" />
+    <Compile Include="Core.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyName.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Readme.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

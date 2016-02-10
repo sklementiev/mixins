@@ -89,5 +89,7 @@
 				Click="ResetClick"
 				Content="Reset" />
 		</StackPanel>
-	</Grid>
+        <CheckBox Content="" Grid.Column="1" HorizontalAlignment="Left" Margin="10.4,16.2,0,0" Grid.Row="4" VerticalAlignment="Top" IsEnabled="False" IsChecked="{Binding IsChanged, Mode=OneWay, ValidatesOnNotifyDataErrors=False}"/>
+        <Label Content="Has changes" HorizontalAlignment="Left" Margin="6,10.2,0,0" Grid.Row="4" VerticalAlignment="Top"/>
+    </Grid>
 </Window>

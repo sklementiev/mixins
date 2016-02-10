@@ -48,11 +48,13 @@ namespace WpfConsole
 		private void ResetClick(object sender, RoutedEventArgs e)
 		{
             Person.RejectChanges();
+            Person.BeginEdit();
 		}
 
 		private void SaveClick(object sender, RoutedEventArgs e)
 		{
             Person.AcceptChanges();
+            Person.BeginEdit();
 		}
 	}
 }
