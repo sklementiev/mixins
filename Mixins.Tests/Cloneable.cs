@@ -30,7 +30,7 @@ namespace Mixins.Tests
         }
 
 		[Test]
-		public void CloneCanBeginEdit()
+		public void ClonedCanBeginEdit()
 		{
 			person.BeginEdit();
 		    person.FirstName = "Kevin";
@@ -42,5 +42,40 @@ namespace Mixins.Tests
             clone.FirstName = "Bob";
             Assert.AreEqual(clone.IsChanged, true);
 		}
+
+        [Test]
+        public void DeepCloneClones()
+        {
+            person.LeftHand = new Hand { Length = 12 };
+            person.RightHand = new Hand { Length = 13 };
+            var clone = person.Clone(true);
+            Assert.AreEqual(12, clone.LeftHand.Length);
+            Assert.AreEqual(13, clone.RightHand.Length);
+            Assert.AreNotSame(person.LeftHand, clone.LeftHand);
+            Assert.AreNotSame(person.RightHand, clone.RightHand);
+        }
+
+        [Test]
+        public void DeepClonePreservesObjectGraphShape()
+        {
+            person.LeftHand = new Hand { Length = 12 };
+            person.RightHand = person.LeftHand;
+            var clone = person.Clone(true);
+            Assert.AreEqual(12, clone.LeftHand.Length);
+            Assert.AreSame(clone.LeftHand, clone.RightHand);
+        }
+
+        [Test]
+        public void DeepCloneClonesWithCircularRefs()
+        {
+            person.LeftHand = new Hand { Holds = person };
+            person.RightHand = new Hand { Holds = person };
+            var clone = person.Clone(true); // another self-embraced person )
+            Assert.AreNotSame(person.LeftHand, clone.LeftHand);
+            Assert.AreNotSame(person.RightHand, clone.RightHand);
+            Assert.AreNotSame(clone.RightHand, clone.LeftHand);
+            Assert.AreSame(clone, clone.RightHand.Holds);
+            Assert.AreSame(clone, clone.LeftHand.Holds);
+        }
     }
 }

@@ -24,5 +24,20 @@
         {
             self.CancelEdit();
         }
+
+        internal static void TrackChanges(this MChangeTracking self, string name, object value)
+        {
+            if (name != SystemFields.IsChanged && self.GetPropertyInternal(SystemFields.Shapshot) != null)
+            {
+                var wasChanged = self.GetPropertyInternal(SystemFields.IsChanged) as bool?;
+                if (wasChanged == null)
+                {
+                    self.SetPropertyInternal(SystemFields.IsChanged, false); // first hit, define IsChanged
+                }
+                var shapshot = (Mixin)self.GetPropertyInternal(SystemFields.Shapshot);
+                var isChanged = !self.ValueEquals(shapshot);
+                self.SetProperty(SystemFields.IsChanged, isChanged);
+            }
+        }
     }
 }

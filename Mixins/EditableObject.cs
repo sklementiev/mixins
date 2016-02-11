@@ -18,7 +18,7 @@
 			var state = self.GetPublicState();
 			object temp;
 			if(state.TryGetValue(SystemFields.Shapshot, out temp)) return; // idempotent
-			var clone = self.Clone<Mixin>();
+			var clone = self.Clone();
 			self.SetPropertyInternal(SystemFields.Shapshot, clone);
             self.SetPropertyInternal(SystemFields.IsChanged, false);
 		}

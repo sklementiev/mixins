@@ -45,9 +45,36 @@ namespace Mixins.Tests
 		public event PropertyChangingEventHandler PropertyChanging;
 		public event PropertyChangedEventHandler PropertyChanged;
 
+        public Hand LeftHand
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public Hand RightHand
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
 	    public bool IsChanged
 		{
 			get { return this.GetValue(); }
 		}
 	}
+
+    public class Hand : MCloneable
+    {
+        public int Length
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public Person Holds
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
 }

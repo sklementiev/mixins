@@ -20,18 +20,8 @@ namespace Mixins
 		private static void StateChanged(MNotifyStateChange self, string name, object value)
 		{
             self.RaisePropertyChanged(name);
-            // todo: delegate to MChangeTracking
-            if (self is MChangeTracking && name != SystemFields.IsChanged && self.GetPropertyInternal(SystemFields.Shapshot) != null)
-            {
-                var wasChanged = self.GetPropertyInternal(SystemFields.IsChanged) as bool?;
-                if (wasChanged == null)
-                {
-                    self.SetPropertyInternal(SystemFields.IsChanged, false); // first hit, define IsChanged
-                }
-                var shapshot = (Mixin)self.GetPropertyInternal(SystemFields.Shapshot);
-                var isChanged = !self.ValueEquals(shapshot); 
-                self.SetProperty(SystemFields.IsChanged, isChanged);
-            }
+		    var tracking = (self as MChangeTracking);
+            if (tracking != null) tracking.TrackChanges(name, value);
 		}
 
 		public static void OnPropertyChanged<T, T1>(this T self, Expression<Func<T, T1>> property, Action<T1> action) where T : MNotifyStateChange
