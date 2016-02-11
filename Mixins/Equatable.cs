@@ -1,13 +1,13 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
 namespace Mixins
 {
-    public interface MEquatable : Mixin, IEquatable<MEquatable> { } // we can compare mixins by value
-
+    /// <summary>
+    /// Implementation of System.IEquatable<T>
+    /// </summary>
     public static partial class Extensions
 	{
-		public static bool Equals<T>(this MEquatable self, T other) where T : MEquatable
+        public static bool ValueEquals(this Mixin self, Mixin other)
 		{
 			var properties = self.GetPublicState();
 			var otherProperties = other.GetPublicState(); 

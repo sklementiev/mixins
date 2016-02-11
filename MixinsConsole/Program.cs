@@ -42,6 +42,7 @@ namespace MixinsConsole
 			Console.WriteLine("Clone the creature!");
 			var clone = creature.Clone();
 			Trace.Assert(clone.Equals(creature));
+            clone.DumpState();
 			Console.WriteLine("Clone is the same as the original!");
 
             clone.PropertyChanging += (sender, eventArgs)
@@ -49,7 +50,9 @@ namespace MixinsConsole
             clone.PropertyChanged += (sender, eventArgs)
                 => Console.WriteLine("{0}", ((Mixin)sender).GetProperty(eventArgs.PropertyName));
 
-			clone.Name = "Stuart";
+            Console.WriteLine("# BeginEdit on clone");
+            clone.BeginEdit();
+			clone.Name = "Clone";
 			clone.DumpState();
 
 			Console.WriteLine("# OnDispose attached");

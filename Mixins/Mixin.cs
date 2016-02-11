@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace Mixins
 {
@@ -72,7 +71,6 @@ namespace Mixins
 			return value;
 		}
 
-		// generic interceptors
 		private static object StateChanging(object self, string name, object value)
 		{
 			var notifyStateChange = self as MNotifyStateChange;

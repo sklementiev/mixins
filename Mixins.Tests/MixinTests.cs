@@ -1,140 +1,100 @@
 ﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NUnit.Framework;
 
 namespace Mixins.Tests
 {
-	[TestClass]
+    using Mixins;
+
+	[TestFixture]
 	public class UnitTests
 	{
-		internal Person Person;
+		private Person person;
 		
-		[TestInitialize]
+		[SetUp]
 		public void Init()
 		{
-			Person = new Person
+			person = new Person
 			{
-			    FirstName = "Bill",
-				LastName = "Klingon",
+			    FirstName = "Bob",
+				LastName = "Minion",
 				DateOfBirth = DateTime.Parse("11/11/11"),
 			};
 		}
 
-		[TestMethod]
-		public void TestMCloneable()
-		{
-			var clone = Person.Clone();
-			Assert.AreNotSame(Person, clone);
-			Assert.AreEqual(Person.FirstName, clone.FirstName);
-			Assert.AreEqual(Person.LastName, clone.LastName);
-			Assert.AreEqual(Person.DateOfBirth, clone.DateOfBirth);
-		}
-
-		[TestMethod]
+		[Test]
 		public void TestMEquatable()
 		{
-			var clone = Person.Clone();
-			Assert.IsTrue(clone.Equals(Person));
+			Mixin clone = person.Clone();
+            Assert.IsTrue(person.ValueEquals(clone));
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestMEditableObject()
 		{
-			var clone = Person.Clone();
-			Person.BeginEdit();
-			Assert.IsTrue(clone.Equals(Person));
-			Person.FirstName = "New name1";
-			Person.LastName = "New name2";
-			Person.DateOfBirth = DateTime.Now;
-			Person.CancelEdit();
-			Assert.IsTrue(clone.Equals(Person));
+			var clone = person.Clone();
+			person.BeginEdit();
+			Assert.IsTrue(clone.ValueEquals(person));
+			person.FirstName = "New name1";
+			person.LastName = "New name2";
+			person.DateOfBirth = DateTime.Now;
+			person.CancelEdit();
+			Assert.IsTrue(clone.ValueEquals(person));
 
 			// idempotent
-			Person.EndEdit();
-			Person.CancelEdit();
-			Person.BeginEdit();
-			Person.BeginEdit();
-            Assert.IsTrue(clone.Equals(Person));
-			Person.FirstName = "Alice";
-			Person.EndEdit();
-			Person.EndEdit();
-			Assert.AreEqual("Alice", Person.FirstName);
+			person.EndEdit();
+			person.CancelEdit();
+			person.BeginEdit();
+			person.BeginEdit();
+            Assert.IsTrue(clone.ValueEquals(person));
+			person.FirstName = "Alice";
+			person.EndEdit();
+			person.EndEdit();
+			Assert.AreEqual("Alice", person.FirstName);
 		}
 
-		[TestMethod]
+		[Test]
 		public void TestMNotifyStateChange()
 		{
 			var firstNameChanged = false;
-			Person.OnPropertyChanged(c => c.FirstName, s => 
+			person.OnPropertyChanged(c => c.FirstName, s => 
 			{ 
 				Assert.AreEqual("New", s);
 				firstNameChanged = true;
 			});
 
-			Person.FirstName = "New";
+			person.FirstName = "New";
 			Assert.IsTrue(firstNameChanged);
 		}
 
-        [TestMethod]
+        [Test]
         public void AssigningSameValueDoesntChangeState()
         {
             var firstNameChanged = false;
-            Person.OnPropertyChanged(c => c.FirstName, s =>
+            person.OnPropertyChanged(c => c.FirstName, s =>
             {
                 firstNameChanged = true;
             });
 
-            Person.FirstName = Person.FirstName;
+            person.FirstName = person.FirstName;
             Assert.IsFalse(firstNameChanged);
         }
 
-		[TestMethod]
+		[Test]
 		public void FullNameDependsOnOtherProperties()
 		{
 			var fullNameChanged = false;
-			Person.OnPropertyChanged(c => c.FullName, s =>
+			person.OnPropertyChanged(c => c.FullName, s =>
 			{
 				fullNameChanged = true;
 			});
-			Person.FirstName = "New";
+			person.FirstName = "New";
 			Assert.IsTrue(fullNameChanged);
             fullNameChanged = false;
-            Person.LastName = "New";
+            person.LastName = "New";
             Assert.IsTrue(fullNameChanged);
 		}
 
-		[TestMethod]
-		public void TestMChangeTracking()
-		{
-            //var clone = Person.Clone();
-
-            //var isChangedChanged = false;
-            //Person.OnPropertyChanged(c => c.IsChanged, s =>
-            //{
-            //    isChangedChanged = true;
-            //});
-
-            //Person.StartTrackingChanges();
-            //Assert.IsFalse(Person.IsChanged);
-            //Person.FirstName = "New";
-            //Assert.IsTrue(Person.IsChanged);
-            //Assert.IsTrue(isChangedChanged);
-            //Person.RejectChanges();
-            //Assert.IsFalse(Person.IsChanged);
-            //Assert.IsTrue(clone.Equals(Person));
-
-            //// idempotent
-            //Person.RejectChanges();
-            //Person.RejectChanges();
-            //Person.StartTrackingChanges();
-            //Person.StartTrackingChanges();
-            //Person.FirstName = "Foo";
-            //var changes = Person.GetChanges();
-            //Assert.IsTrue(changes.Count == 1);
-            //Assert.IsTrue(((ValueChange)changes["FirstName"]).OldValue.ToString() == clone.FirstName);
-            //Assert.IsTrue(((ValueChange)changes["FirstName"]).NewValue.ToString() == "Foo");
-		}
-
-        [TestMethod]
+        [Test]
         public void TestMMapper()
         {
             var foo = new Foo
@@ -161,156 +121,6 @@ namespace Mixins.Tests
             Assert.AreEqual(13, bar.Count);
             Assert.AreEqual(100, foo.Length);
             Assert.AreEqual("LONG", bar.Length);
-        }
-
-        [TestMethod]
-        public void TestCollectionDiffAdded()
-        {
-            //var old = new List<string>
-            //{
-            //    "One",
-            //    "Two",
-            //    "Three"
-            //};
-
-            //var current = new List<string>
-            //{
-            //    "One",
-            //    "Two",
-            //    "Three",
-            //    "Four",
-            //    "Five",
-            //    "Five",
-            //    "One"
-            //};
-
-            //var added = new List<string>
-            //{
-            //    "One",
-            //    "Four",
-            //    "Five",
-            //    "Five"
-            //};
-
-            //var diff = current.GetDiff(old);
-            //CollectionAssert.AreEqual(added, diff.Added);
-        }
-
-        [TestMethod]
-        public void TestCollectionDiffDeleted()
-        {
-            //var old = new List<string>
-            //{
-            //    "One",
-            //    "One",
-            //    "Two",
-            //    "Three"
-            //};
-
-            //var current = new List<string>
-            //{
-            //    "One",
-            //};
-
-            //var deleted = new List<string>
-            //{
-            //    "One",
-            //    "Two",
-            //    "Three"            
-            //};
-
-            //var diff = current.GetDiff(old);
-            //CollectionAssert.AreEqual(deleted, diff.Removed);
-        }
-
-        [TestMethod]
-        public void TrackCollectionChanges()
-        {
-            //var changedRaisedTimes = 0;
-            //var listChangedRaisedTimes = 0;
-
-            //Person.Friends.Add(new Person { FirstName = "Liz", LastName = "Tayler" });
-            //Person.Friends.Add(new Person { FirstName = "Big", LastName = "Trailer" });
-
-            //Person.OnPropertyChanged(c => c.IsChanged, s =>
-            //{
-            //    changedRaisedTimes++;
-            //});
-
-            //Person.OnPropertyChanged(c => c.Friends, s =>
-            //{
-            //    listChangedRaisedTimes++;
-            //});
-            
-            //Person.StartTrackingChanges();
-            //Person.StartTrackingChanges();
-            //Assert.IsFalse(Person.IsChanged);
-            //Person.Friends.Add(new Person { FirstName = "Foo", LastName = "Bar" });
-            //Assert.IsTrue(Person.IsChanged);
-            //var changes = Person.GetChanges();
-            //var change = changes["Friends"] as CollectionChange;
-            //Assert.IsTrue(change.Added.Count == 1);
-            //Assert.IsTrue(change.Removed.Count == 0);
-            //Assert.IsTrue(change.Changed.Count == 0);
-            
-            //Person.Friends.RemoveAt(Person.Friends.Count() - 1);
-
-            //changes = Person.GetChanges();
-            //Assert.AreEqual(0, changes.Count); 
-
-            //Assert.IsFalse(Person.IsChanged);
-            //Person.Friends.RemoveAt(Person.Friends.Count() - 1);
-            //Assert.IsTrue(Person.IsChanged);
-
-            //changes = Person.GetChanges();
-            //change = changes["Friends"] as CollectionChange;
-            //Assert.IsTrue(change.Added.Count == 0); 
-            //Assert.IsTrue(change.Removed.Count == 1);
-            //Assert.IsTrue(change.Changed.Count == 0);
-
-            //Person.Friends[Person.Friends.Count() - 1].LastName = "Murray";
-            //changes = Person.GetChanges();
-            //change = changes["Friends"] as CollectionChange;
-            //Assert.IsTrue(change.Added.Count == 0);
-            //Assert.IsTrue(change.Removed.Count == 1);
-            //Assert.IsTrue(change.Changed.Count == 1);
-
-            //Assert.AreEqual(4, changedRaisedTimes);
-            //Assert.AreEqual(4, listChangedRaisedTimes);
-        }
-
-        [TestMethod]
-        public void ChangingCollectionItemChangeParentState()
-        {
-            //Person.Friends.Add(new Person {FirstName = "Sergey", LastName = "Brin"});
-            //Person.StartTrackingChanges();
-            //var friend = Person.Friends[0];
-            //var oldName = friend.FirstName;
-            //friend.FirstName = "Alex";
-            //Assert.IsTrue(Person.IsChanged);
-            //Assert.IsTrue(friend.IsChanged);
-            //friend.FirstName = oldName;
-            //Assert.IsFalse(Person.IsChanged);
-            //Assert.IsFalse(friend.IsChanged);
-        }
-
-        [TestMethod]
-        public void ListItemChangesBubbleUpToParent()
-        {
-            //Person.FirstName = "Parent";
-            //var child = new Person { FirstName = "Child" };
-            //child.Friends.Add(new Person { FirstName = "Grandchild" });
-            //Person.Friends.Add(child);
-
-            //Person.StartTrackingChanges();
-            //var friendOfFriend = Person.Friends[0].Friends[0];
-            //var oldName = friendOfFriend.FirstName;
-            //friendOfFriend.FirstName = "New";
-            //Assert.IsTrue(Person.IsChanged);
-            //Assert.IsTrue(friendOfFriend.IsChanged);
-            //friendOfFriend.FirstName = oldName;
-            //Assert.IsFalse(Person.IsChanged);
-            //Assert.IsFalse(friendOfFriend.IsChanged);
         }
     }
 }

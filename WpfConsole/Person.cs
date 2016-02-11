@@ -44,35 +44,5 @@ namespace WpfConsole
 		{
 			get { return this.GetValue() ?? false; }
 		}
-
-        void IChangeTracking.AcceptChanges()
-        {
-            this.AcceptChanges();
-        }
-
-        void IRevertibleChangeTracking.RejectChanges()
-	    {
-            this.RejectChanges();
-	    }
-
-        void IEditableObject.BeginEdit()
-	    {
-	        this.BeginEdit();
-	    }
-
-        void IEditableObject.EndEdit()
-	    {
-            this.EndEdit();
-	    }
-
-        void IEditableObject.CancelEdit()
-	    {
-            this.CancelEdit();
-	    }
-
-        public bool Equals(MEquatable other)
-        {
-            return this.Equals<MEquatable>(other);
-        }
     }
 }

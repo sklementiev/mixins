@@ -20,6 +20,7 @@ namespace Mixins
 		private static void StateChanged(MNotifyStateChange self, string name, object value)
 		{
             self.RaisePropertyChanged(name);
+            // todo: delegate to MChangeTracking
             if (self is MChangeTracking && name != SystemFields.IsChanged && self.GetPropertyInternal(SystemFields.Shapshot) != null)
             {
                 var wasChanged = self.GetPropertyInternal(SystemFields.IsChanged) as bool?;
@@ -27,14 +28,9 @@ namespace Mixins
                 {
                     self.SetPropertyInternal(SystemFields.IsChanged, false); // first hit, define IsChanged
                 }
-                wasChanged = wasChanged ?? false;
-                var shapshot = (MEquatable)self.GetPropertyInternal(SystemFields.Shapshot);
-                var isChanged = !shapshot.Equals((MEquatable)self);
-                
-                if (wasChanged != isChanged)
-                {
-                    self.SetProperty(SystemFields.IsChanged, !wasChanged);
-                }
+                var shapshot = (Mixin)self.GetPropertyInternal(SystemFields.Shapshot);
+                var isChanged = !self.ValueEquals(shapshot); 
+                self.SetProperty(SystemFields.IsChanged, isChanged);
             }
 		}
 

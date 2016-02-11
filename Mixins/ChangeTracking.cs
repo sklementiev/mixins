@@ -1,10 +1,13 @@
-﻿using System.ComponentModel;
-
-namespace Mixins
+﻿namespace Mixins
 {
-    // our version of IRevertibleChangeTracking
-    public interface MChangeTracking : MNotifyStateChange, IRevertibleChangeTracking, MEditableObject, MEquatable { }
+    public interface MChangeTracking : MNotifyStateChange, MEditableObject
+    {
+        bool IsChanged { get; }
+    }
 
+    /// <summary>
+    /// Implementation of System.ComponentModel.IRevertibleChangeTracking
+    /// </summary>
 	public static partial class Extensions
 	{
         private static partial class SystemFields

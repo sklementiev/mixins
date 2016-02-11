@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
-
-namespace Mixins
+﻿namespace Mixins
 {
-    // another example of implementing standart interfaces
-    public interface MEditableObject : MCloneable, MMapper, IEditableObject { } 
+    public interface MEditableObject : MCloneable, MMapper { } 
 
+    /// <summary>
+    /// Implementation of System.ComponentModel.IEditableObject
+    /// </summary>
 	public static partial class Extensions
 	{
 		private static partial class SystemFields
@@ -20,6 +20,7 @@ namespace Mixins
 			if(state.TryGetValue(SystemFields.Shapshot, out temp)) return; // idempotent
 			var clone = self.Clone<Mixin>();
 			self.SetPropertyInternal(SystemFields.Shapshot, clone);
+            self.SetPropertyInternal(SystemFields.IsChanged, false);
 		}
 
 		public static void EndEdit(this MEditableObject self)
@@ -36,7 +37,6 @@ namespace Mixins
 
 		public static void CancelEdit(this MEditableObject self)
 		{
-            // self.SetProperty(SystemFields.IsChanged, false);
             // restore state from temporary storage, discard temporary state
 			var state = self.GetStateInternal();
 			object clone;

@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Composite.cs" />
     <Compile Include="Cloneable.cs" />
     <Compile Include="ChangeTracking.cs" />
     <Compile Include="Disposable.cs" />
@@ -50,7 +51,7 @@
     <Compile Include="NotifyStateChange.cs" />
     <Compile Include="Mapper.cs" />
     <Compile Include="Equatable.cs" />
-    <Compile Include="Core.cs" />
+    <Compile Include="Mixin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyName.cs" />
   </ItemGroup>

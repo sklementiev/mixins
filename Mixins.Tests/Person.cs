@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Mixins.Tests
 {
-	public class Person : MChangeTracking, MEquatable
+	public class Person : MChangeTracking
 	{
 		public Person()
 		{
@@ -48,36 +48,6 @@ namespace Mixins.Tests
 	    public bool IsChanged
 		{
 			get { return this.GetValue(); }
-		}
-
-        void IChangeTracking.AcceptChanges()
-        {
-            this.AcceptChanges();
-        }
-
-        void IRevertibleChangeTracking.RejectChanges()
-        {
-            this.RejectChanges();
-        }
-
-	    public bool Equals(MEquatable other)
-		{
-			return this.Equals<MEquatable>(other);
-		}
-
-		void IEditableObject.BeginEdit()
-		{
-			this.BeginEdit();
-		}
-
-		void IEditableObject.EndEdit()
-		{
-			this.EndEdit();
-		}
-
-		void IEditableObject.CancelEdit()
-		{
-			this.CancelEdit();
 		}
 	}
 }

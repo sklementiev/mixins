@@ -43,7 +43,6 @@ namespace MixinsConsole
         MCanScratch, 
         MCanBark, 
         MChangeTracking,
-        MEquatable,
         MDisposable
     {
         public string Name
@@ -61,39 +60,9 @@ namespace MixinsConsole
         public event PropertyChangingEventHandler PropertyChanging;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        void IEditableObject.BeginEdit()
-        {
-            this.BeginEdit();
-        }
-
-        void IEditableObject.EndEdit()
-        {
-            this.EndEdit();
-        }
-
-        void IEditableObject.CancelEdit()
-        {
-            this.CancelEdit();
-        }
-
-        public bool Equals(MEquatable other)
-        {
-            return this.Equals<MEquatable>(other);
-        }
-
         public bool IsChanged
         {
             get { return this.GetValue(); }
-        }
-
-        void IChangeTracking.AcceptChanges()
-        {
-            this.AcceptChanges();
-        }
-
-        void IRevertibleChangeTracking.RejectChanges()
-        {
-            this.RejectChanges();
         }
     }
 }
