@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Data\Bar.cs" />
     <Compile Include="Cloneable.cs" />
+    <Compile Include="DynamicMixin.cs" />
     <Compile Include="Mapper.cs" />
     <Compile Include="Equatable.cs" />
     <Compile Include="Editable.cs" />

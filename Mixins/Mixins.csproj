@@ -47,6 +47,7 @@
     <Compile Include="Cloneable.cs" />
     <Compile Include="ChangeTracking.cs" />
     <Compile Include="Disposable.cs" />
+    <Compile Include="DynamicMixin.cs" />
     <Compile Include="EditableObject.cs" />
     <Compile Include="Debug.cs" />
     <Compile Include="NotifyStateChange.cs" />
