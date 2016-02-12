@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Linq;
 
@@ -9,7 +8,8 @@ namespace Mixins
 
 	public static partial class Extensions
 	{
-		private static readonly ConditionalWeakTable<object, Dictionary<string, object>> State = new ConditionalWeakTable<object, Dictionary<string, object>>();
+		private static readonly ConditionalWeakTable<object, Dictionary<string, object>> State = 
+            new ConditionalWeakTable<object, Dictionary<string, object>>();
 
         public static dynamic GetValue(this Mixin self, [CallerMemberName] string name = null)
         {
@@ -26,17 +26,6 @@ namespace Mixins
             return self.GetPropertyInternal(name);
         }
 
-        public static void DumpState(this Mixin self)
-        {
-            var properties = self.GetStateInternal();
-            Console.WriteLine("=========================================================================================================");
-            foreach (var propertyName in properties.Keys.OrderBy(c => c))
-            {
-                Console.WriteLine("{0,-50}{1}", propertyName, properties[propertyName]);
-            }
-            Console.WriteLine("=========================================================================================================");
-        }
-
 		internal static void SetProperty(this Mixin self, string name, object value)
 		{
 			if(Equals(value, self.GetProperty(name))) return;
@@ -50,12 +39,15 @@ namespace Mixins
 			return State.GetOrCreateValue(self);
 		}
 
-	    internal const char SystemFieldPrefix = '#';
+        private static partial class SystemFields
+        {
+            public const char Prefix = '#';
+        }
 
 		internal static Dictionary<string, object> GetPublicState(this Mixin self)
 		{
             return self.GetStateInternal()
-                .Where(c => c.Key.First() != SystemFieldPrefix && c.Key != SystemFields.IsChanged)
+                .Where(c => c.Key.First() != SystemFields.Prefix && c.Key != SystemFields.IsChanged)
                 .ToDictionary(c => c.Key, c => c.Value); 
 		}
 

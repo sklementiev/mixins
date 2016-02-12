@@ -51,10 +51,13 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bar.cs" />
+    <Compile Include="Data\Bar.cs" />
     <Compile Include="Cloneable.cs" />
-    <Compile Include="MixinTests.cs" />
-    <Compile Include="Foo.cs" />
+    <Compile Include="Mapper.cs" />
+    <Compile Include="Equatable.cs" />
+    <Compile Include="Editable.cs" />
+    <Compile Include="NotifyStateChange.cs" />
+    <Compile Include="Data\Foo.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

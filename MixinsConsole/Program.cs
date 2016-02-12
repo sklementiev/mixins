@@ -9,7 +9,7 @@ namespace MixinsConsole
 		static void Main()
 		{
 			var creature = new Creature { Name = "Rusty", DateOfBirth = DateTime.Now };
-            creature.DumpState();
+            creature.PrintState();
 			creature.Bark();
 			creature.Scratch();
 
@@ -19,7 +19,7 @@ namespace MixinsConsole
             creature.PropertyChanged += (sender, eventArgs)
                 => Console.WriteLine("{0}", ((Mixin)sender).GetProperty(eventArgs.PropertyName));
             creature.Name = "Bob";
-            creature.DumpState();
+            creature.PrintState();
 
             Console.WriteLine("# MEditableObject");
             creature.BeginEdit();
@@ -27,22 +27,22 @@ namespace MixinsConsole
             creature.Name = "Bob"; // IsChanged == false again!
             creature.Name = "Stuart";
             creature.DateOfBirth = DateTime.Parse("11/11/11");
-            creature.DumpState();
+            creature.PrintState();
             Console.WriteLine("# CancelEdit");
             creature.CancelEdit();
-            creature.DumpState();
+            creature.PrintState();
 
             creature.BeginEdit();
             creature.Name = "Kevin";
             Console.WriteLine("# AcceptChanges");
             creature.AcceptChanges();
-            creature.DumpState();
+            creature.PrintState();
 
 			Console.WriteLine("# MCloneable, MEquatable");
 			Console.WriteLine("Clone the creature!");
 			var clone = creature.Clone();
-			Trace.Assert(clone.Equals(creature));
-            clone.DumpState();
+			Trace.Assert(clone.ValueEquals(creature));
+            clone.PrintState();
 			Console.WriteLine("Clone is the same as the original!");
 
             clone.PropertyChanging += (sender, eventArgs)
@@ -53,11 +53,11 @@ namespace MixinsConsole
             Console.WriteLine("# BeginEdit on clone");
             clone.BeginEdit();
 			clone.Name = "Clone";
-			clone.DumpState();
+			clone.PrintState();
 
 			Console.WriteLine("# OnDispose attached");
 			clone.OnDispose(c => Console.WriteLine("{0} is disposed!", c.Name));
-			clone.DumpState();
+			clone.PrintState();
 
 			// ReSharper disable RedundantAssignment
 			clone = null;

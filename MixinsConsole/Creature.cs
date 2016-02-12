@@ -43,7 +43,8 @@ namespace MixinsConsole
         MCanScratch, 
         MCanBark, 
         MChangeTracking,
-        MDisposable
+        MDisposable,
+        MDebug
     {
         public string Name
         {

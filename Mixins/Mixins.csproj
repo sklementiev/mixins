@@ -48,6 +48,7 @@
     <Compile Include="ChangeTracking.cs" />
     <Compile Include="Disposable.cs" />
     <Compile Include="EditableObject.cs" />
+    <Compile Include="Debug.cs" />
     <Compile Include="NotifyStateChange.cs" />
     <Compile Include="Mapper.cs" />
     <Compile Include="Equatable.cs" />
