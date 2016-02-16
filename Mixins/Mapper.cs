@@ -1,5 +1,4 @@
-﻿using System;
-using System.Dynamic;
+﻿using System.Dynamic;
 using System.Linq;
 
 namespace Mixins
@@ -23,16 +22,25 @@ namespace Mixins
                 var newProps = otherState.Select(c => c.Key).Except(sameProps).ToList();
                 foreach (var prop in newProps)
                 {
-                    var propertyType = destination.GetPropertyType(prop);
-                    destination.SetProperty(prop, propertyType.GetDefaultValue());
+                    var destinationPropertyType = destination.GetPropertyType(prop);
+                    if (destination is DynamicObject)
+                    {
+                        destination.SetProperty(prop, null);
+                    }
+                    else
+                    {
+                        destination.SetProperty(prop, destinationPropertyType.GetDefaultValue());    
+                    }
                 }
             }
             foreach (var name in sameProps)
             {
                 var sourcePropType = self.GetPropertyType(name);
                 var destPropType = destination.GetPropertyType(name);
-                if (!destPropType.IsAssignableFrom(sourcePropType)) return;
-                destination.SetProperty(name, self.GetProperty(name));
+                if (destPropType.IsAssignableFrom(sourcePropType) || (shapshot && destination is DynamicObject))
+                {
+                    destination.SetProperty(name, self.GetProperty(name));
+                }
             }
         }
     }

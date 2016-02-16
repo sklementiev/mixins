@@ -41,14 +41,19 @@ namespace Mixins
 			self.PropertyChanged += (sender, args) => { if (string.CompareOrdinal(args.PropertyName, propertyName) == 0) action((T)self.GetProperty(propertyName)); };
 		}
 
+        public static void NotifyOnChange<T>(this MNotifyStateChange self, string dependentProperty, params string[] dependsOn)
+        {
+            foreach (var dependsOnPropName in dependsOn)
+            {
+                self.HookToPropertyChangedEvent<T>(dependsOnPropName, c => self.RaisePropertyChanged(dependentProperty));
+            }
+        }
+
 		public static void NotifyOnChange<T>(this MNotifyStateChange self, Expression<Func<T>> dependentProperty, params Expression<Func<object>>[] dependsOn)
 		{
 			var propertyName = PropertyName.For(dependentProperty);
-			var dependsOnProps = dependsOn.Select(PropertyName.For);
-			foreach (var dependsOnPropName in dependsOnProps)
-			{
-				self.HookToPropertyChangedEvent<T>(dependsOnPropName, c => self.RaisePropertyChanged(propertyName));
-			}
+			var dependsOnProps = dependsOn.Select(PropertyName.For).ToArray();
+		    self.NotifyOnChange<T>(propertyName, dependsOnProps);
 		}
 
 		public static void RaisePropertyChanged(this MNotifyStateChange self, Expression<Func<object>> property)

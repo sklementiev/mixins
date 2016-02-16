@@ -58,8 +58,16 @@ namespace WpfConsole
 
 		private void SaveClick(object sender, RoutedEventArgs e)
 		{
-            Person.AcceptChanges();
-            Person.BeginEdit();
+            if (dynamicVM.IsChecked.Value)
+            {
+                PersonDynamic.AcceptChanges();
+                PersonDynamic.BeginEdit();
+            }
+            else
+            {
+                Person.AcceptChanges();
+                Person.BeginEdit();
+            }
 		}
 
         private void dynamicVM_Unchecked(object sender, RoutedEventArgs e)

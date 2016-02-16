@@ -88,7 +88,7 @@ namespace Mixins.Tests
             bar.Boo = "boo";
             ((MMapper)foo).MapTo((MMapper)bar, true);
             Assert.AreEqual("Foo", bar.Name);
-            Assert.AreEqual(0, bar.Tag);
+            Assert.AreEqual(null, bar.Tag);
             Assert.AreEqual(null, bar.Boo);
         }
     }

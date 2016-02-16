@@ -10,10 +10,7 @@ namespace WpfConsole
             dynamic self = this;
             self.FirstName = "Bob";
             self.LastName = "Dynamic";
-            //this.NotifyOnChange(
-            //    () => FullName,
-            //                // depends on
-            //    () => FirstName, () => LastName);
+            this.NotifyOnChange<string>("FullName", "FirstName", "LastName");
         }
 
         public event PropertyChangingEventHandler PropertyChanging;
