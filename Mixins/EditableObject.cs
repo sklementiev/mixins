@@ -41,7 +41,7 @@
 			var state = self.GetStateInternal();
 			object clone;
 			if (!state.TryGetValue(SystemFields.Shapshot, out clone)) return; // idempotent
-            ((MMapper)clone).MapTo(self);
+            ((MMapper)clone).MapTo(self, true);
             State.Remove(clone);
             state.Remove(SystemFields.Shapshot);
 		}

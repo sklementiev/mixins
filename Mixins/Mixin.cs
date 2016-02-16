@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Linq;
 
@@ -24,6 +25,24 @@ namespace Mixins
         public static object GetProperty(this Mixin self, string name)
         {
             return self.GetPropertyInternal(name);
+        }
+
+        public static IEnumerable<string> GetMembers(this Mixin self)
+        {
+            return self.GetPublicState().Keys;
+        }
+
+        public static Type GetPropertyType(this Mixin self, string name)
+        {
+            var property = self.GetType().GetProperty(name);
+            if (property != null) return self.GetType().GetProperty(name).PropertyType;
+            var value = self.GetProperty(name);
+            return value == null ? typeof(object) : value.GetType();
+        }
+
+        private static object GetDefaultValue(this Type type)
+        {
+            return type.IsValueType ? Activator.CreateInstance(type) : null;
         }
 
 		internal static void SetProperty(this Mixin self, string name, object value)

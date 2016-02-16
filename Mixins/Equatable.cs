@@ -8,10 +8,8 @@ namespace Mixins
     public static partial class Extensions
 	{
         public static bool ValueEquals(this Mixin self, Mixin other)
-		{
-			var properties = self.GetPublicState();
-			var otherProperties = other.GetPublicState(); 
-			return properties.SequenceEqual(otherProperties);
-		}
-    }
+        {
+            return self.GetMembers().All(name => Equals(self.GetProperty(name), other.GetProperty(name)));
+        }
+	}
 }

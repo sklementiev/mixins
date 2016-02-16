@@ -1,10 +1,22 @@
 ﻿using System;
 
-namespace Mixins.Tests
+namespace Mixins.Tests.Data
 {
     public class Foo : MMapper
     {
         public string Name
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public int Tag
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public DateTime? Date
         {
             get { return this.GetValue(); }
             set { this.SetValue(value); }

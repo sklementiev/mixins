@@ -51,8 +51,10 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\BarDynamic.cs" />
     <Compile Include="Data\Bar.cs" />
     <Compile Include="Cloneable.cs" />
+    <Compile Include="Data\FooDynamic.cs" />
     <Compile Include="DynamicMixin.cs" />
     <Compile Include="Mapper.cs" />
     <Compile Include="Equatable.cs" />

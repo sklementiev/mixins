@@ -1,9 +1,15 @@
-﻿using System.Dynamic;
+﻿using System.Collections.Generic;
+using System.Dynamic;
 
 namespace Mixins
 {
     public class DynamicMixin : DynamicObject, Mixin
     {
+        public override IEnumerable<string> GetDynamicMemberNames()
+        {
+            return this.GetMembers();
+        }
+
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
             result = this.GetProperty(binder.Name);

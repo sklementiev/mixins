@@ -10,17 +10,16 @@ namespace WpfConsole
 	public partial class MainWindow : Window
 	{
 		internal Person Person;
-		
+        
 		public MainWindow()
 		{
 			InitializeComponent();
 
-			Person = new Person
-			{
-				FirstName = "Bob",
-				LastName = "Marley",
-				DateOfBirth = DateTime.Today
-			};
+            Person = new Person
+            {
+                FirstName = "Bob",
+                LastName = "Sponge",
+            };
 			
 			Person.OnPropertyChanged(c => c.IsChanged, 
 				isChanged =>

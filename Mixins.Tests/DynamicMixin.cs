@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System;
+using Mixins.Tests.Data;
+using NUnit.Framework;
 
 namespace Mixins.Tests
 {
@@ -30,8 +32,25 @@ namespace Mixins.Tests
             dynamic person = new Person();
             person.Name = "Bob";
             dynamic clone = ((MCloneable)person).Clone();
+            var cloneMixin = (MCloneable) clone;
             Assert.AreNotSame(clone, person);
             Assert.AreEqual(clone.Name, person.Name);
+            Assert.IsTrue(cloneMixin.ValueEquals((Mixin)person));
+        }
+
+        [Test]
+        public void DynamicMixinCanGetPropertyType()
+        {
+            dynamic foo = new FooDynamic();
+            foo.Name = "Foo";
+            foo.Boo = 1;
+            var fooMixin = (Mixin) foo;
+            Assert.AreEqual(typeof(string), fooMixin.GetPropertyType("Name"));
+            Assert.AreEqual(typeof(int), fooMixin.GetPropertyType("Boo"));
+            foo.Boo = DateTime.Now;
+            Assert.AreEqual(typeof(DateTime), fooMixin.GetPropertyType("Boo"));
+            foo.Boo = null;
+            Assert.AreEqual(typeof(object), fooMixin.GetPropertyType("Boo"));
         }
     }
 }

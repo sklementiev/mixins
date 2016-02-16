@@ -9,17 +9,22 @@ namespace WpfConsole
         public PersonDynamic()
         {
             dynamic self = this;
-            self.FirstName = "Aa";
-            self.LastName = "Bb";
+            self.FirstName = "Bob";
+            self.LastName = "Minion";
+            //self.DateOfBirth = DateTime.Today;
         }
 
         public event PropertyChangingEventHandler PropertyChanging;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        //public string FullName
-        //{
-        //    get { return FirstName + " " + LastName; }
-        //}
+        public string FullName
+        {
+            get
+            {
+                dynamic self = this;
+                return self.FirstName + " " + self.LastName;
+            }
+        }
 
         public bool IsChanged
         {
