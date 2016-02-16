@@ -10,6 +10,7 @@ namespace WpfConsole
 	public partial class MainWindow : Window
 	{
 		internal Person Person;
+        internal PersonDynamic PersonDynamic;
         
 		public MainWindow()
 		{
@@ -17,7 +18,7 @@ namespace WpfConsole
 
             Person = new Person
             {
-                FirstName = "Bob",
+                FirstName = "Ron",
                 LastName = "Sponge",
             };
 			
@@ -28,14 +29,31 @@ namespace WpfConsole
 			    	Save.IsEnabled = Reset.IsEnabled = isChanged;
 			    });
 
+            PersonDynamic = new PersonDynamic();
+
+            PersonDynamic.OnPropertyChanged(c => c.IsChanged,
+                isChanged =>
+                {
+                    Title = isChanged ? Title + '*' : Title.TrimEnd('*');
+                    Save.IsEnabled = Reset.IsEnabled = isChanged;
+                });
+
 			Person.BeginEdit();
 			DataContext = Person;
 		}
 
 		private void ResetClick(object sender, RoutedEventArgs e)
 		{
-            Person.RejectChanges();
-            Person.BeginEdit();
+            if (dynamicVM.IsChecked.Value)
+            {
+                PersonDynamic.RejectChanges();
+                PersonDynamic.BeginEdit();
+            }
+            else
+            {
+                Person.RejectChanges();
+                Person.BeginEdit();
+            }
 		}
 
 		private void SaveClick(object sender, RoutedEventArgs e)
@@ -43,5 +61,17 @@ namespace WpfConsole
             Person.AcceptChanges();
             Person.BeginEdit();
 		}
+
+        private void dynamicVM_Unchecked(object sender, RoutedEventArgs e)
+        {
+            DataContext = Person;
+            PersonDynamic.BeginEdit();
+        }
+
+        private void dynamicVM_Checked(object sender, RoutedEventArgs e)
+        {
+            DataContext = PersonDynamic;
+            PersonDynamic.BeginEdit();
+        }
 	}
 }
