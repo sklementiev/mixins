@@ -35,7 +35,7 @@
                     self.SetPropertyInternal(SystemFields.IsChanged, false); // first hit, define IsChanged
                 }
                 var shapshot = (Mixin)self.GetPropertyInternal(SystemFields.Shapshot);
-                var isChanged = !self.ValueEquals(shapshot);
+                var isChanged = !self.EqualsByValue(shapshot);
                 self.SetProperty(SystemFields.IsChanged, isChanged);
             }
         }

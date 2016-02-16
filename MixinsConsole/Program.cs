@@ -41,7 +41,7 @@ namespace MixinsConsole
 			Console.WriteLine("# MCloneable, MEquatable");
 			Console.WriteLine("Clone the creature!");
 			var clone = creature.Clone();
-			Trace.Assert(clone.ValueEquals(creature));
+			Trace.Assert(clone.EqualsByValue(creature));
             clone.PrintState();
 			Console.WriteLine("Clone is the same as the original!");
 

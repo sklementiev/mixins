@@ -25,7 +25,7 @@ namespace Mixins.Tests
 		public void TestMEquatable()
 		{
 			Mixin clone = person.Clone();
-            Assert.IsTrue(person.ValueEquals(clone));
+            Assert.IsTrue(person.EqualsByValue(clone));
 		}
     }
 }

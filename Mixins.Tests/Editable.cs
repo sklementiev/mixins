@@ -24,19 +24,19 @@ namespace Mixins.Tests
 		{
 			var clone = person.Clone();
 			person.BeginEdit();
-			Assert.IsTrue(clone.ValueEquals(person));
+			Assert.IsTrue(clone.EqualsByValue(person));
 			person.FirstName = "New name1";
 			person.LastName = "New name2";
 			person.DateOfBirth = DateTime.Now;
 			person.CancelEdit();
-			Assert.IsTrue(clone.ValueEquals(person));
+			Assert.IsTrue(clone.EqualsByValue(person));
 
 			// idempotent
 			person.EndEdit();
 			person.CancelEdit();
 			person.BeginEdit();
 			person.BeginEdit();
-            Assert.IsTrue(clone.ValueEquals(person));
+            Assert.IsTrue(clone.EqualsByValue(person));
 			person.FirstName = "Alice";
 			person.EndEdit();
 			person.EndEdit();

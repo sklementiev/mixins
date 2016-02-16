@@ -3,11 +3,11 @@
 namespace Mixins
 {
     /// <summary>
-    /// Implementation of System.IEquatable<T>
+    /// We can compare mixins by value
     /// </summary>
     public static partial class Extensions
 	{
-        public static bool ValueEquals(this Mixin self, Mixin other)
+        public static bool EqualsByValue(this Mixin self, Mixin other)
         {
             return self.GetMembers().All(name => Equals(self.GetProperty(name), other.GetProperty(name)));
         }

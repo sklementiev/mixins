@@ -35,7 +35,7 @@ namespace Mixins.Tests
             var cloneMixin = (MCloneable) clone;
             Assert.AreNotSame(clone, person);
             Assert.AreEqual(clone.Name, person.Name);
-            Assert.IsTrue(cloneMixin.ValueEquals((Mixin)person));
+            Assert.IsTrue(cloneMixin.EqualsByValue((Mixin)person));
         }
 
         [Test]
