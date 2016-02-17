@@ -71,7 +71,7 @@ namespace Mixins.Tests
             bar.Name = "Bar";
             bar.Age = 2;
             bar.Tag = "tag";
-            ((MMapper)foo).MapTo((MMapper)bar);
+            ((IMapper) foo).MapTo((IMapper) bar);
             Assert.AreEqual("Foo", bar.Name);
             Assert.AreEqual(1, bar.Age);
             Assert.AreEqual("tag", bar.Tag);
@@ -86,7 +86,7 @@ namespace Mixins.Tests
             bar.Name = "Bar";
             bar.Tag = 1;
             bar.Boo = "boo";
-            ((MMapper)foo).MapTo((MMapper)bar, true);
+            ((IMapper) foo).MapTo((IMapper) bar, true);
             Assert.AreEqual("Foo", bar.Name);
             Assert.AreEqual(null, bar.Tag);
             Assert.AreEqual(null, bar.Boo);

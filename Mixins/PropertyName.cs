@@ -13,7 +13,7 @@ namespace Mixins
             var body = expression.Body;
             return GetMemberName(body);
         }
-		
+
         public static string For<T>(Expression<Func<T>> expression)
         {
             var body = expression.Body;

@@ -1,5 +1,9 @@
 ﻿namespace Mixins
 {
-    // marker interface to specify "part of a whole" relation
-    public interface MComposite : Mixin { } 
+    /// <summary>
+    /// marker interface to specify "part of a whole" relation 
+    /// </summary>
+    public interface IComposite : IMixin
+    {
+    }
 }

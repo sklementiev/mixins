@@ -3,11 +3,13 @@ using System.Linq;
 
 namespace Mixins
 {
-	public interface MDebug : Mixin { }
+    public interface IDebug : IMixin
+    {
+    }
 
-	public static partial class Extensions
-	{
-        public static void PrintState(this MDebug self)
+    public static partial class Extensions
+    {
+        public static void PrintState(this IDebug self)
         {
             var properties = self.GetStateInternal();
             Console.WriteLine("=========================================================================================================");

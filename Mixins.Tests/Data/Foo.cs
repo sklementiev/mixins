@@ -2,7 +2,7 @@
 
 namespace Mixins.Tests.Data
 {
-    public class Foo : MMapper
+    public class Foo : IMapper
     {
         public string Name
         {
