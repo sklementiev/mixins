@@ -1,4 +1,6 @@
-﻿namespace Mixins.Tests.Data
+﻿using System.ComponentModel;
+
+namespace Mixins.Tests.Data
 {
     public class Product : IMixin
     {
@@ -17,5 +19,11 @@
 
     public class CloneableProduct : Product, ICloneable
     {
+    }
+
+    public class ProductWithChangeNotification : Product, INotifyStateChange
+    {
+        public event PropertyChangingEventHandler PropertyChanging;
+        public event PropertyChangedEventHandler PropertyChanged;
     }
 }

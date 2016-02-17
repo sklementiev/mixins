@@ -2,7 +2,9 @@
 
 namespace Mixins
 {
-    // we can attach custom action on dispose
+    /// <summary>
+    /// we can attach any custom action on dispose 
+    /// </summary>
     public interface IDisposable : IMixin
     {
     }

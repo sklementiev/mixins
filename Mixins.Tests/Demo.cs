@@ -46,5 +46,22 @@ namespace Mixins.Tests
 
             Assert.IsTrue(banana.EqualsByValue(banana2));
         }
+
+        [Test]
+        public void Notification()
+        {
+            var banana = new ProductWithChangeNotification
+            {
+                Name = "Banana",
+                Price = new decimal(2.5)
+            };
+
+            banana.PropertyChanged += (sender, args) =>
+            {
+                Console.WriteLine("{0} changed to {1}", args.PropertyName, banana.GetProperty(args.PropertyName));
+            };
+
+            banana.Price = 3; // prints "Price changed to 3"
+        }
     }
 }

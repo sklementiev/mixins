@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace Mixins
 {
+    /// <summary>
+    /// Base Mixin interface
+    /// </summary>
     public interface IMixin
     {
     }
@@ -50,7 +53,7 @@ namespace Mixins
         internal static void SetProperty(this IMixin self, string name, object value)
         {
             if (Equals(value, self.GetProperty(name))) return;
-            var newValue = StateChanging(self, name, value);
+            StateChanging(self, name, value);
             self.SetPropertyInternal(name, value);
             StateChanged(self, name, value);
         }
@@ -84,14 +87,13 @@ namespace Mixins
             return value;
         }
 
-        private static object StateChanging(object self, string name, object value)
+        private static void StateChanging(object self, string name, object value)
         {
             var notifyStateChange = self as INotifyStateChange;
             if (notifyStateChange != null)
             {
                 StateChanging(notifyStateChange, name, value);
             }
-            return value;
         }
 
         private static void StateChanged(object self, string name, object value)

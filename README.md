@@ -2,6 +2,7 @@
 Mixins implementation in C#
 
 How often have you wanted to be able to extend class functionality without actually writing any code?
+
 Now you can! You can add required functionality to any class just by adding an interface definition to it!
 You can freely mix any generic functionality from mixins into your class.
 
@@ -22,8 +23,10 @@ Example time!
         }
     }
 
-As we can see this class is just marked with IMixin interface, there is no real implementation! You do not reqire to inherit from any base class! But you can, of course! The only prerequisite for mixins to work is getters and setters.
-They can contain any logic but in the end must call IMixin's extension methods GetValue() and SetValue(value).
+As we can see this class is just marked with IMixin interface, there is no real implementation! 
+
+**You do not reqire to inherit from any base class! But you can, of course! The only prerequisite for mixins to work is getters and setters.
+They can contain any logic but in the end must call IMixin's extension methods GetValue() and SetValue(value).**
 
 
 
@@ -70,3 +73,30 @@ All we need to do is to mark our class with the mixin we need - ICloneable
     Assert.IsTrue(banana.EqualsByValue(banana2));
 
 How easy is that? As we can see we can add any functionality we need just by adding an interface to a class!
+
+But I still want more! Something exciting! ) Ok, what if we suddenly want to get notifications on our object changes? Easy again!
+
+
+    public class ProductWithChangeNotification : Product, INotifyStateChange
+    {
+        public event PropertyChangingEventHandler PropertyChanging;
+        public event PropertyChangedEventHandler PropertyChanged;
+    }
+
+Prove it!
+
+    var banana = new ProductWithChangeNotification
+    {
+        Name = "Banana",
+        Price = new decimal(2.5)
+    };
+
+    banana.PropertyChanged += (sender, args) =>
+    {
+        Console.WriteLine("{0} changed to {1}", args.PropertyName, banana.GetProperty(args.PropertyName));
+    };
+
+    banana.Price = 3; // prints "Price changed to 3"
+
+How cool is that?
+

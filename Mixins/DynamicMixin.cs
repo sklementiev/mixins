@@ -3,6 +3,9 @@ using System.Dynamic;
 
 namespace Mixins
 {
+    /// <summary>
+    /// Dynamic implementation for Mixins
+    /// </summary>
     public class DynamicMixin : DynamicObject, IMixin
     {
         public override IEnumerable<string> GetDynamicMemberNames()
