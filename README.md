@@ -213,7 +213,7 @@ You can run and explore WPF example project (WpfConsole) to see how it all works
 
 **The other interesting aspect is that mixins actually support dynamic objects as well!**
 
-In that case we don't really care about properties definitions, and our code became something like this
+In that case we don't really care about property definitions and our code became something as trivial as this
 
     public class ProductDynamic : DynamicMixin, ICloneable
     {
