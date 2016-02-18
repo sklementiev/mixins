@@ -100,3 +100,43 @@ Prove it!
 
 How cool is that?
 
+There are so many options to create and reuse generic algorithms/behaviours when use mixins. For example - mapping. Is is usual and mundane task to copy data from DTO object to ViewModel (espesially if they share the same property names). With mixins it's a breeze!
+
+    public class ProductDto : IMapper
+    {
+        public string Name
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public decimal Price
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public string ProducedBy
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
+
+Let's transfer data to the other mixin based on the same property names and compatible types.
+
+            var bananaDto = new ProductDto
+            {
+                Name = "Banana",
+                Price = new decimal(2.5),
+                ProducedBy = "Banana tree"
+            };
+
+            var banana = new Product();
+
+            bananaDto.MapTo(banana);
+
+            Assert.AreEqual(bananaDto.Name, banana.Name);
+            Assert.AreEqual(bananaDto.Price, banana.Price);
+
+Amazing, isn't it?
