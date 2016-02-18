@@ -101,7 +101,7 @@ Prove it!
 
 How cool is that?
 
-There are so many options to create and reuse generic algorithms/behaviours when use mixins. For example - mapping. It is usual and mundane task to copy data from DTO object to ViewModel (espesially if they share the same property names). With mixins it's a breeze!
+There are so many options to create and reuse generic algorithms/behaviours when use mixins. For example - mapping. It is usual and mundane task to copy data from DTO object to ViewModel (espesially if they share the same property names) and with mixins help it's a breeze!
 
     public class ProductDto : IMapper
     {
