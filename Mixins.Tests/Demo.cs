@@ -81,5 +81,65 @@ namespace Mixins.Tests
             Assert.AreEqual(bananaDto.Name, banana.Name);
             Assert.AreEqual(bananaDto.Price, banana.Price);
         }
+
+        [Test]
+        public void Editable()
+        {
+            var banana = new EditableProduct
+            {
+                Name = "Banana",
+                Price = new decimal(2.5)
+            };
+
+            banana.BeginEdit();
+            banana.Name = "Apple";
+            banana.Price = 7;
+            banana.CancelEdit();
+
+            Assert.AreEqual("Banana", banana.Name);
+            Assert.AreEqual(2.5, banana.Price);
+        }
+
+        [Test]
+        public void ChangeTracking()
+        {
+            var banana = new ProductWithChangeTracking
+            {
+                Name = "Banana",
+                Price = new decimal(2.5)
+            };
+
+            banana.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName != "IsChanged") return;
+                Console.WriteLine("{0} = {1}", args.PropertyName, banana.GetProperty(args.PropertyName));
+            };
+
+            banana.BeginEdit();
+            banana.Name = "Apple";  // prints IsChanged = true
+            banana.Name = "Banana"; // prints IsChanged = false
+            banana.Price = 5;       // prints IsChanged = true
+            banana.CancelEdit();    // prints IsChanged = false
+
+            Assert.IsFalse(banana.IsChanged);
+            Assert.AreEqual("Banana", banana.Name);
+            Assert.AreEqual(2.5, banana.Price);
+        }
+
+
+        [Test]
+        public void DynamicClone()
+        {
+            dynamic banana = new ProductDynamic();
+            banana.Name = "Banana";
+            banana.Price = new decimal(2.5);
+            
+            ICloneable mixin = banana;
+            dynamic clone = mixin.Clone();
+            
+            Assert.AreNotSame(banana, clone);
+            Assert.AreEqual(banana.Name, clone.Name);
+            Assert.AreEqual(banana.Price, clone.Price);
+        }
     }
 }

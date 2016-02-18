@@ -100,7 +100,7 @@ Prove it!
 
 How cool is that?
 
-There are so many options to create and reuse generic algorithms/behaviours when use mixins. For example - mapping. Is is usual and mundane task to copy data from DTO object to ViewModel (espesially if they share the same property names). With mixins it's a breeze!
+There are so many options to create and reuse generic algorithms/behaviours when use mixins. For example - mapping. It is usual and mundane task to copy data from DTO object to ViewModel (espesially if they share the same property names). With mixins it's a breeze!
 
     public class ProductDto : IMapper
     {
@@ -125,18 +125,111 @@ There are so many options to create and reuse generic algorithms/behaviours when
 
 Let's transfer data to the other mixin based on the same property names and compatible types.
 
-            var bananaDto = new ProductDto
-            {
-                Name = "Banana",
-                Price = new decimal(2.5),
-                ProducedBy = "Banana tree"
-            };
+    var bananaDto = new ProductDto
+    {
+        Name = "Banana",
+        Price = new decimal(2.5),
+        ProducedBy = "Banana tree"
+    };
 
-            var banana = new Product();
+    var banana = new Product();
 
-            bananaDto.MapTo(banana);
+    bananaDto.MapTo(banana);
 
-            Assert.AreEqual(bananaDto.Name, banana.Name);
-            Assert.AreEqual(bananaDto.Price, banana.Price);
+    Assert.AreEqual(bananaDto.Name, banana.Name);
+    Assert.AreEqual(bananaDto.Price, banana.Price);
 
 Amazing, isn't it?
+
+The other common behaviour that we can get for free with mixins is implementation of System.ComponentModel.IEditableObject interface. It allows object to accept or reject changes to its state.
+
+    public class EditableProduct : Product, IEditableObject
+    {
+    }
+
+Note that IEditableObject is a mixin that composed from two other mixins!
+
+    public interface IEditableObject : ICloneable, IMapper {}
+
+Let's see it in action
+
+    var banana = new EditableProduct
+    {
+        Name = "Banana",
+        Price = new decimal(2.5)
+    };
+
+    banana.BeginEdit();
+    banana.Name = "Apple";
+    banana.Price = 7;
+    banana.CancelEdit();
+
+    Assert.AreEqual("Banana", banana.Name);
+    Assert.AreEqual(2.5, banana.Price);
+
+Pretty neat, huh?
+Let's look at something more complex but useful. How about a mixin that can track changes to the object state and notify consumers (usually UI controls) on the fact that it has changes to be saved. Enters IChangeTracking!
+
+    public interface IChangeTracking : INotifyStateChange, IEditableObject
+    {
+        bool IsChanged { get; }
+    }
+
+Our product class will become
+
+    public class ProductWithChangeTracking : Product, IChangeTracking
+    {
+        public event PropertyChangingEventHandler PropertyChanging;
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public bool IsChanged
+        {
+            get { return this.GetValue(); }
+        }
+    }
+
+
+Let's demo that
+
+    var banana = new ProductWithChangeTracking
+    {
+        Name = "Banana",
+        Price = new decimal(2.5)
+    };
+
+    banana.PropertyChanged += (sender, args) =>
+    {
+        if (args.PropertyName != "IsChanged") return;
+        Console.WriteLine("{0} = {1}", args.PropertyName, banana.GetProperty(args.PropertyName));
+    };
+
+    banana.BeginEdit();
+    banana.Name = "Apple";  // prints IsChanged = true
+    banana.Name = "Banana"; // prints IsChanged = false
+    banana.Price = 5;       // prints IsChanged = true
+    banana.CancelEdit();    // prints IsChanged = false
+
+You can run and explore WPF example project (WpfConsole) to see how it all works in real life.
+
+**The other interesting aspect is that mixins actually support dynamic objects as well!**
+
+In that case we don't really care about properties definitions, and our code became something like this
+
+    public class ProductDynamic : DynamicMixin, ICloneable
+    {
+    }
+
+    dynamic banana = new ProductDynamic();
+    banana.Name = "Banana";
+    banana.Price = new decimal(2.5);
+    
+    ICloneable mixin = banana;
+    dynamic clone = mixin.Clone();
+    
+    Assert.AreNotSame(banana, clone);
+    Assert.AreEqual(banana.Name, clone.Name);
+    Assert.AreEqual(banana.Price, clone.Price);
+
+----------
+
+###I would love to hear your ideas on how we can improve it, which new mixins should we create. Feel free to contribute! 

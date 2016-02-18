@@ -47,4 +47,23 @@ namespace Mixins.Tests.Data
             set { this.SetValue(value); }
         }
     }
+
+    public class EditableProduct : Product, IEditableObject
+    {
+    }
+
+    public class ProductWithChangeTracking : Product, IChangeTracking
+    {
+        public event PropertyChangingEventHandler PropertyChanging;
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public bool IsChanged
+        {
+            get { return this.GetValue(); }
+        }
+    }
+
+    public class ProductDynamic : DynamicMixin, ICloneable
+    {
+    }
 }
