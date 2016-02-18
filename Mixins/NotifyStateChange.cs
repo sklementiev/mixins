@@ -10,9 +10,7 @@ namespace Mixins
     /// NotifyStateChange mixin
     /// mixins can aggregate/extend standart interfaces
     /// </summary>
-    public interface INotifyStateChange : IMixin, INotifyPropertyChanging, INotifyPropertyChanged
-    {
-    }
+    public interface INotifyStateChange : IMixin, INotifyPropertyChanging, INotifyPropertyChanged {}
 
     public static partial class Extensions
     {

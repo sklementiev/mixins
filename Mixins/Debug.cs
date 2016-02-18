@@ -3,9 +3,7 @@ using System.Linq;
 
 namespace Mixins
 {
-    public interface IDebug : IMixin
-    {
-    }
+    public interface IDebug : IMixin {}
 
     public static partial class Extensions
     {

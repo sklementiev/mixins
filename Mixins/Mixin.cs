@@ -8,9 +8,7 @@ namespace Mixins
     /// <summary>
     /// Base Mixin interface
     /// </summary>
-    public interface IMixin
-    {
-    }
+    public interface IMixin {}
 
     public static partial class Extensions
     {
@@ -42,11 +40,13 @@ namespace Mixins
             var property = self.GetType().GetProperty(name);
             if (property != null) return self.GetType().GetProperty(name).PropertyType;
             var value = self.GetProperty(name);
-            return value == null ? typeof (object) : value.GetType();
+            //return value == null ? typeof (object) : value.GetType();
+            return value == null ? null : value.GetType();
         }
 
         private static object GetDefaultValue(this Type type)
         {
+            if (type == null) return null;
             return type.IsValueType ? Activator.CreateInstance(type) : null;
         }
 

@@ -26,4 +26,25 @@ namespace Mixins.Tests.Data
         public event PropertyChangingEventHandler PropertyChanging;
         public event PropertyChangedEventHandler PropertyChanged;
     }
+
+    public class ProductDto : IMapper
+    {
+        public string Name
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public decimal Price
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public string ProducedBy
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
 }

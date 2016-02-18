@@ -7,9 +7,7 @@ namespace Mixins
     /// Type safe version of ICloneable, with deep clone ability
     /// Deep clone will work only on MCloneable properties
     /// </summary>
-    public interface ICloneable : IMixin
-    {
-    }
+    public interface ICloneable : IMixin {}
 
     public static partial class Extensions
     {

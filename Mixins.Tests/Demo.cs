@@ -63,5 +63,23 @@ namespace Mixins.Tests
 
             banana.Price = 3; // prints "Price changed to 3"
         }
+
+        [Test]
+        public void Mapper()
+        {
+            var bananaDto = new ProductDto
+            {
+                Name = "Banana",
+                Price = new decimal(2.5),
+                ProducedBy = "Banana tree"
+            };
+
+            var banana = new Product();
+
+            bananaDto.MapTo(banana);
+
+            Assert.AreEqual(bananaDto.Name, banana.Name);
+            Assert.AreEqual(bananaDto.Price, banana.Price);
+        }
     }
 }

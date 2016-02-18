@@ -5,9 +5,7 @@ namespace Mixins
     /// <summary>
     /// we can attach any custom action on dispose 
     /// </summary>
-    public interface IDisposable : IMixin
-    {
-    }
+    public interface IDisposable : IMixin {}
 
     public static partial class Extensions
     {

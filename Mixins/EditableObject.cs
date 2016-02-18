@@ -1,8 +1,6 @@
 ﻿namespace Mixins
 {
-    public interface IEditableObject : ICloneable, IMapper
-    {
-    }
+    public interface IEditableObject : ICloneable, IMapper {}
 
     /// <summary>
     /// Implementation of System.ComponentModel.IEditableObject

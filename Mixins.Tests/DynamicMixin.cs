@@ -7,7 +7,7 @@ namespace Mixins.Tests
     [TestFixture]
     public class DynamicMixinTests
     {
-        public class Person : DynamicMixin, ICloneable
+        public class Person : DynamicMixin, IEditableObject
         {
             public Person()
             {
@@ -50,7 +50,26 @@ namespace Mixins.Tests
             foo.Boo = DateTime.Now;
             Assert.AreEqual(typeof (DateTime), fooMixin.GetPropertyType("Boo"));
             foo.Boo = null;
-            Assert.AreEqual(typeof (object), fooMixin.GetPropertyType("Boo"));
+            Assert.AreEqual(null, fooMixin.GetPropertyType("Boo"));
+        }
+
+        [Test]
+        public void CanCancelChanges()
+        {
+            dynamic foo = new Person();
+            var fooMixin = (IEditableObject)foo;
+            fooMixin.BeginEdit();
+            foo.Name = "Foo";
+            foo.Boo = 1;
+            fooMixin.CancelEdit();
+            Assert.AreEqual(null, foo.Name);
+            Assert.AreEqual(null, foo.Boo);
+            fooMixin.BeginEdit();
+            foo.Name = "Foo2";
+            foo.Boo = 2;
+            fooMixin.CancelEdit();
+            Assert.AreEqual(null, foo.Name);
+            Assert.AreEqual(null, foo.Boo);
         }
     }
 }
