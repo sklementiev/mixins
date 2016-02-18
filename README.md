@@ -1,10 +1,10 @@
 # Mixins
 Mixins implementation in C#
 
-How often have you wanted to be able to extend class functionality without actually writing any code?
+How often have you imagined to be able to extend class functionality without actually writing any code?
 
 Now you can! You can add required functionality to any class just by adding an interface definition to it!
-You can freely mix any generic functionality from mixins into your class.
+You can freely add and mix any generic functionality/behaviours from mixins into your class.
 
 Example time!
 
@@ -23,12 +23,11 @@ Example time!
         }
     }
 
-As we can see this class is just marked with IMixin interface, there is no real implementation! 
+As we can see this class is just marked with IMixin interface, there is no real implementation! Even interface itself is empty!
 
-**You do not reqire to inherit from any base class! But you can, of course! The only prerequisite for mixins to work is getters and setters.
-They can contain any logic but in the end must call IMixin's extension methods GetValue() and SetValue(value).**
+    public interface IMixin {}
 
-
+You do not require to inherit from any base class! But you can, of course! The only prerequisite for mixins to work is getters and setters. They can contain any logic but in the end must call IMixin's extension methods GetValue() and SetValue(value).
 
 Let's see what minimum functionality mixin provides
 
@@ -54,6 +53,8 @@ Let's see what minimum functionality mixin provides
 
     Assert.IsTrue(banana.EqualsByValue(banana2));
 
+So every mixin can get set of properties it has, get or set a value and type of property by its name and can be compared with any other mixin by value.
+
 Ok, it looks useful, but I want more! For example, let's say I want to clone mixins! Easy!
 
     public class CloneableProduct : Product, ICloneable
@@ -72,7 +73,7 @@ All we need to do is to mark our class with the mixin we need - ICloneable
 
     Assert.IsTrue(banana.EqualsByValue(banana2));
 
-How easy is that? As we can see we can add any functionality we need just by adding an interface to a class!
+How easy is that? As we can see we can add any functionality we need just by adding an interface to a class! (Mixins even support deep cloning by the way)
 
 But I still want more! Something exciting! ) Ok, what if we suddenly want to get notifications on our object changes? Easy again!
 
