@@ -2,6 +2,8 @@
 
 Mixins implementation in C#
 
+NuGet **Install-Package Mixins.NET**
+
 How often have you imagined to be able to extend class functionality without actually writing any code?
 
 Now you can! You can add required functionality to any class just by adding an interface definition to it!
