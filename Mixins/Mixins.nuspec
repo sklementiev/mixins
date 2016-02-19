@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/sklementiev/mixins/blob/develop/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/sklementiev/mixins</projectUrl>
+    <iconUrl>http://image005.flaticon.com/1/svg/109/109875.svg</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Mixins implementation in .NET</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>Mixins C#</tags>
+  </metadata>
+</package>
