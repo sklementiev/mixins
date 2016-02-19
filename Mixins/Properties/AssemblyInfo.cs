@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("Mixins")]
+[assembly: AssemblyTitle("Mixins.NET")]
 [assembly: AssemblyDescription("Mixins implementation in .NET")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Sergey Klementiev")]
