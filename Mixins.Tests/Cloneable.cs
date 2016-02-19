@@ -3,21 +3,21 @@ using NUnit.Framework;
 
 namespace Mixins.Tests
 {
-	[TestFixture]
-	public class Cloneable
-	{
-		private Person person;
-		
-		[SetUp]
-		public void Init()
-		{
-			person = new Person
-			{
-			    FirstName = "Bob",
-				LastName = "Minion",
-				DateOfBirth = DateTime.Parse("11/11/11"),
-			};
-		}
+    [TestFixture]
+    public class Cloneable
+    {
+        private Person person;
+
+        [SetUp]
+        public void Init()
+        {
+            person = new Person
+            {
+                FirstName = "Bob",
+                LastName = "Minion",
+                DateOfBirth = DateTime.Parse("11/11/11"),
+            };
+        }
 
         [Test]
         public void CloningClones()
@@ -29,25 +29,25 @@ namespace Mixins.Tests
             Assert.AreEqual(person.DateOfBirth, clone.DateOfBirth);
         }
 
-		[Test]
-		public void ClonedCanBeginEdit()
-		{
-			person.BeginEdit();
-		    person.FirstName = "Kevin";
+        [Test]
+        public void ClonedCanBeginEdit()
+        {
+            person.BeginEdit();
+            person.FirstName = "Kevin";
             var clone = person.Clone();
-			Assert.AreNotSame(person, clone);
-			Assert.AreEqual(person.FirstName, clone.FirstName);
+            Assert.AreNotSame(person, clone);
+            Assert.AreEqual(person.FirstName, clone.FirstName);
             clone.BeginEdit();
             Assert.AreEqual(clone.IsChanged, false);
             clone.FirstName = "Bob";
             Assert.AreEqual(clone.IsChanged, true);
-		}
+        }
 
         [Test]
         public void DeepCloneClones()
         {
-            person.LeftHand = new Hand { Length = 12 };
-            person.RightHand = new Hand { Length = 13 };
+            person.LeftHand = new Hand {Length = 12};
+            person.RightHand = new Hand {Length = 13};
             var clone = person.Clone(true);
             Assert.AreEqual(12, clone.LeftHand.Length);
             Assert.AreEqual(13, clone.RightHand.Length);
@@ -58,7 +58,7 @@ namespace Mixins.Tests
         [Test]
         public void DeepClonePreservesObjectGraphShape()
         {
-            person.LeftHand = new Hand { Length = 12 };
+            person.LeftHand = new Hand {Length = 12};
             person.RightHand = person.LeftHand;
             var clone = person.Clone(true);
             Assert.AreEqual(12, clone.LeftHand.Length);
@@ -68,8 +68,8 @@ namespace Mixins.Tests
         [Test]
         public void DeepCloneClonesWithCircularRefs()
         {
-            person.LeftHand = new Hand { Holds = person };
-            person.RightHand = new Hand { Holds = person };
+            person.LeftHand = new Hand {Holds = person};
+            person.RightHand = new Hand {Holds = person};
             var clone = person.Clone(true); // another self-embraced person )
             Assert.AreNotSame(person.LeftHand, clone.LeftHand);
             Assert.AreNotSame(person.RightHand, clone.RightHand);

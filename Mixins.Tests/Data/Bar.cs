@@ -2,7 +2,7 @@
 
 namespace Mixins.Tests.Data
 {
-    public class Bar : Mixin
+    public class Bar : IMixin
     {
         public string Name
         {

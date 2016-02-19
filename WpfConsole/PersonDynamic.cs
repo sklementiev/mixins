@@ -1,9 +1,10 @@
 using System.ComponentModel;
 using Mixins;
+using IChangeTracking = Mixins.IChangeTracking;
 
 namespace WpfConsole
 {
-    public class PersonDynamic : DynamicMixin, MChangeTracking
+    public class PersonDynamic : DynamicMixin, IChangeTracking
     {
         public PersonDynamic()
         {

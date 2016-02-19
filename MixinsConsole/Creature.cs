@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel;
 using Mixins;
+using IChangeTracking = Mixins.IChangeTracking;
+using IDisposable = Mixins.IDisposable;
 
 namespace Mixins
 {
@@ -10,9 +12,13 @@ namespace Mixins
     }
 
     // can contain required behaviour/data
-    public interface MCanBark : Mixin { }
+    public interface MCanBark : IMixin
+    {
+    }
 
-    public interface MCanScratch : Mixin { }
+    public interface MCanScratch : IMixin
+    {
+    }
 
     // extensible behaviour/state
     public static class Extensions
@@ -38,13 +44,13 @@ namespace Mixins
 
 namespace MixinsConsole
 {
-    public class Creature : 
+    public class Creature :
         IHasName,
-        MCanScratch, 
-        MCanBark, 
-        MChangeTracking,
-        MDisposable,
-        MDebug
+        MCanScratch,
+        MCanBark,
+        IChangeTracking,
+        IDisposable,
+        IDebug
     {
         public string Name
         {

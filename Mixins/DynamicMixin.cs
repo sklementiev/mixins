@@ -3,7 +3,10 @@ using System.Dynamic;
 
 namespace Mixins
 {
-    public class DynamicMixin : DynamicObject, Mixin
+    /// <summary>
+    /// Dynamic implementation for Mixins
+    /// </summary>
+    public class DynamicMixin : DynamicObject, IMixin
     {
         public override IEnumerable<string> GetDynamicMemberNames()
         {

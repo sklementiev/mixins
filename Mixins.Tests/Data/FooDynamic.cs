@@ -1,6 +1,6 @@
 ﻿namespace Mixins.Tests.Data
 {
-    public class FooDynamic : DynamicMixin, MMapper
+    public class FooDynamic : DynamicMixin, IMapper
     {
         public string Name
         {

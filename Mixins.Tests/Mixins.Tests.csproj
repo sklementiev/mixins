@@ -51,6 +51,8 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Product.cs" />
+    <Compile Include="Demo.cs" />
     <Compile Include="Data\BarDynamic.cs" />
     <Compile Include="Data\Bar.cs" />
     <Compile Include="Cloneable.cs" />

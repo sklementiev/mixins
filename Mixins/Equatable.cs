@@ -6,10 +6,10 @@ namespace Mixins
     /// We can compare mixins by value
     /// </summary>
     public static partial class Extensions
-	{
-        public static bool EqualsByValue(this Mixin self, Mixin other)
+    {
+        public static bool EqualsByValue(this IMixin self, IMixin other)
         {
             return self.GetMembers().All(name => Equals(self.GetProperty(name), other.GetProperty(name)));
         }
-	}
+    }
 }

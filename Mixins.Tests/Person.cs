@@ -4,34 +4,34 @@ using System.ComponentModel;
 
 namespace Mixins.Tests
 {
-	public class Person : MChangeTracking
-	{
-		public Person()
-		{
+    public class Person : IChangeTracking
+    {
+        public Person()
+        {
             Friends = new ObservableCollection<Person>();
-            this.NotifyOnChange(() => FullName, 
-				() => FirstName, () => LastName);
+            this.NotifyOnChange(() => FullName,
+                () => FirstName, () => LastName);
         }
 
-		public string FirstName
-		{
-			get { return this.GetValue(); }
-			set { this.SetValue(value); }
-		}
-
-		public string LastName
-		{
+        public string FirstName
+        {
             get { return this.GetValue(); }
             set { this.SetValue(value); }
         }
 
-		public string FullName
-		{
-			get { return FirstName + " " + LastName; }
-		}
+        public string LastName
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
 
-		public DateTime? DateOfBirth
-		{
+        public string FullName
+        {
+            get { return FirstName + " " + LastName; }
+        }
+
+        public DateTime? DateOfBirth
+        {
             get { return this.GetValue(); }
             set { this.SetValue(value); }
         }
@@ -42,8 +42,8 @@ namespace Mixins.Tests
             set { this.SetValue(value); }
         }
 
-		public event PropertyChangingEventHandler PropertyChanging;
-		public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangingEventHandler PropertyChanging;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public Hand LeftHand
         {
@@ -57,13 +57,13 @@ namespace Mixins.Tests
             set { this.SetValue(value); }
         }
 
-	    public bool IsChanged
-		{
-			get { return this.GetValue(); }
-		}
-	}
+        public bool IsChanged
+        {
+            get { return this.GetValue(); }
+        }
+    }
 
-    public class Hand : MCloneable
+    public class Hand : ICloneable
     {
         public int Length
         {
