@@ -58,6 +58,7 @@
     <Compile Include="PropertyName.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Mixins.nuspec" />
     <None Include="Readme.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

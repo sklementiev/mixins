@@ -1,5 +1,8 @@
-# Mixins
+# Mixins [![Build status](https://ci.appveyor.com/api/projects/status/2dmaheiwr8s9phnl?svg=true)](https://ci.appveyor.com/project/sklementiev/mixins)
+
 Mixins implementation in C#
+
+NuGet **Install-Package Mixins.NET**
 
 How often have you imagined to be able to extend class functionality without actually writing any code?
 
