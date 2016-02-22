@@ -9,7 +9,7 @@ namespace Mixins
     {
         public static void PrintState(this IDebug self)
         {
-            var properties = self.GetStateInternal();
+            var properties = self.GetInternalState();
             Console.WriteLine("=========================================================================================================");
             foreach (var propertyName in properties.Keys.OrderBy(c => c))
             {

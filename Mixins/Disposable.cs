@@ -38,7 +38,7 @@ namespace Mixins
 
         public static void OnDispose<T>(this T self, Action<T> action) where T : IDisposable
         {
-            var state = self.GetStateInternal();
+            var state = self.GetInternalState();
             object old;
             if (state.TryGetValue(SystemFields.Lifetime, out old))
             {

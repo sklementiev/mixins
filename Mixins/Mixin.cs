@@ -40,7 +40,6 @@ namespace Mixins
             var property = self.GetType().GetProperty(name);
             if (property != null) return self.GetType().GetProperty(name).PropertyType;
             var value = self.GetProperty(name);
-            //return value == null ? typeof (object) : value.GetType();
             return value == null ? null : value.GetType();
         }
 
@@ -58,7 +57,7 @@ namespace Mixins
             StateChanged(self, name, value);
         }
 
-        internal static Dictionary<string, object> GetStateInternal(this IMixin self)
+        internal static Dictionary<string, object> GetInternalState(this IMixin self)
         {
             return State.GetOrCreateValue(self);
         }
@@ -70,20 +69,20 @@ namespace Mixins
 
         internal static Dictionary<string, object> GetPublicState(this IMixin self)
         {
-            return self.GetStateInternal()
+            return self.GetInternalState()
                 .Where(c => c.Key.First() != SystemFields.Prefix && c.Key != SystemFields.IsChanged)
                 .ToDictionary(c => c.Key, c => c.Value);
         }
 
         internal static void SetPropertyInternal(this IMixin self, string name, object value)
         {
-            self.GetStateInternal()[name] = value;
+            self.GetInternalState()[name] = value;
         }
 
         internal static object GetPropertyInternal(this IMixin self, string name)
         {
             object value;
-            var success = self.GetStateInternal().TryGetValue(name, out value);
+            var success = self.GetInternalState().TryGetValue(name, out value);
             return value;
         }
 
