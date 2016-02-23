@@ -30,7 +30,7 @@ namespace Mixins
         {
             var type = self.GetPropertyType(name);
             var value = self.GetPropertyInternal(name);
-            if (value == Value.Undefined)
+            if (type != null && value == Value.Undefined)
             {
                 return type.GetDefaultValue();
             }
