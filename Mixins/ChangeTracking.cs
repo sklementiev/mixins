@@ -27,13 +27,8 @@
 
         internal static void TrackChanges(this IChangeTracking self, string name, object value)
         {
-            if (name != SystemFields.IsChanged && self.GetPropertyInternal(SystemFields.Shapshot) != null)
+            if (name != SystemFields.IsChanged && self.GetPropertyInternal(SystemFields.Shapshot) != Value.Undefined)
             {
-                var wasChanged = self.GetPropertyInternal(SystemFields.IsChanged) as bool?;
-                if (wasChanged == null)
-                {
-                    self.SetPropertyInternal(SystemFields.IsChanged, false); // first hit, define IsChanged
-                }
                 var shapshot = (IMixin) self.GetPropertyInternal(SystemFields.Shapshot);
                 var isChanged = !self.EqualsByValue(shapshot);
                 self.SetProperty(SystemFields.IsChanged, isChanged);

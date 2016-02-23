@@ -71,7 +71,7 @@ namespace Mixins.Tests.Data
     {
         public bool IsReadOnly
         {
-            get { return this.GetValue() ?? false; }
+            get { return this.GetValue(); }
             set { this.SetValue(value); }
         }
     }
