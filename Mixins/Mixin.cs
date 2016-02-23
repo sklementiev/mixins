@@ -52,7 +52,7 @@ namespace Mixins
         internal static void SetProperty(this IMixin self, string name, object value)
         {
             if (Equals(value, self.GetProperty(name))) return;
-            StateChanging(self, name, value);
+            if (!StateChanging(self, name, value)) return; // we can cancel state change
             self.SetPropertyInternal(name, value);
             StateChanged(self, name, value);
         }
@@ -86,13 +86,19 @@ namespace Mixins
             return value;
         }
 
-        private static void StateChanging(object self, string name, object value)
+        private static bool StateChanging(object self, string name, object value)
         {
             var notifyStateChange = self as INotifyStateChange;
             if (notifyStateChange != null)
             {
                 StateChanging(notifyStateChange, name, value);
             }
+            var readOnly = self as IReadOnly;
+            if (readOnly != null && readOnly.IsReadOnly)
+            {
+                return false;
+            }
+            return true;
         }
 
         private static void StateChanged(object self, string name, object value)

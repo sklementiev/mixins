@@ -66,4 +66,13 @@ namespace Mixins.Tests.Data
     public class ProductDynamic : DynamicMixin, ICloneable
     {
     }
+
+    public class ReadOnlyProduct : Product, IReadOnly
+    {
+        public bool IsReadOnly
+        {
+            get { return this.GetValue() ?? false; }
+            set { this.SetValue(value); }
+        }
+    }
 }

@@ -141,5 +141,22 @@ namespace Mixins.Tests
             Assert.AreEqual(banana.Name, clone.Name);
             Assert.AreEqual(banana.Price, clone.Price);
         }
+
+        [Test]
+        public void ReadOnly()
+        {
+            var banana = new ReadOnlyProduct
+            {
+                Name = "Banana",
+                Price = new decimal(2.5)
+            };
+
+            banana.Name = "Apple";
+            Assert.AreNotEqual("Banana", banana.Name);
+            
+            banana.IsReadOnly = true;
+            banana.Name = "Mango";
+            Assert.AreEqual("Apple", banana.Name);
+        }
     }
 }

@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ReadOnly.cs" />
     <Compile Include="Composite.cs" />
     <Compile Include="Cloneable.cs" />
     <Compile Include="ChangeTracking.cs" />
