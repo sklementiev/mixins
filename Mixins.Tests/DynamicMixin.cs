@@ -71,5 +71,19 @@ namespace Mixins.Tests
             Assert.AreEqual(null, foo.Name);
             Assert.AreEqual(null, foo.Boo);
         }
+
+        [Test]
+        public void EqualsByValueWorks()
+        {
+            dynamic foo = new Person();
+            var fooMixin = (IMixin)foo;
+            foo.Name = "Bob";
+            dynamic bar = new Person();
+            bar.Name = "Bob";
+            Assert.IsTrue(fooMixin.EqualsByValue((IMixin)bar));
+
+            bar.Tag = 1;
+            Assert.IsFalse(fooMixin.EqualsByValue((IMixin)bar));
+        }
     }
 }
