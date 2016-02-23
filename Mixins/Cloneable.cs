@@ -5,7 +5,7 @@ namespace Mixins
 {
     /// <summary>
     /// Type safe version of ICloneable, with deep clone ability
-    /// Deep clone will work only on MCloneable properties
+    /// Deep clone will work only on ICloneable properties
     /// </summary>
     public interface ICloneable : IMixin {}
 
@@ -14,7 +14,7 @@ namespace Mixins
         private static T CloneInternal<T>(this T self, bool deep, Dictionary<ICloneable, ICloneable> cloned)
             where T : ICloneable
         {
-            // trace cloned objects to preserve object grapth structure and deal with circular refs
+            // trace cloned objects to preserve object graph structure and deal with circular refs
             var clone = Activator.CreateInstance(self.GetType());
             cloned.Add(self, (ICloneable) clone);
 

@@ -40,7 +40,6 @@ namespace Mixins
             var property = self.GetType().GetProperty(name);
             if (property != null) return self.GetType().GetProperty(name).PropertyType;
             var value = self.GetProperty(name);
-            //return value == null ? typeof (object) : value.GetType();
             return value == null ? null : value.GetType();
         }
 
@@ -53,12 +52,12 @@ namespace Mixins
         internal static void SetProperty(this IMixin self, string name, object value)
         {
             if (Equals(value, self.GetProperty(name))) return;
-            StateChanging(self, name, value);
+            if (!StateChanging(self, name, value)) return; // we can cancel state change
             self.SetPropertyInternal(name, value);
             StateChanged(self, name, value);
         }
 
-        internal static Dictionary<string, object> GetStateInternal(this IMixin self)
+        internal static Dictionary<string, object> GetInternalState(this IMixin self)
         {
             return State.GetOrCreateValue(self);
         }
@@ -70,30 +69,36 @@ namespace Mixins
 
         internal static Dictionary<string, object> GetPublicState(this IMixin self)
         {
-            return self.GetStateInternal()
+            return self.GetInternalState()
                 .Where(c => c.Key.First() != SystemFields.Prefix && c.Key != SystemFields.IsChanged)
                 .ToDictionary(c => c.Key, c => c.Value);
         }
 
         internal static void SetPropertyInternal(this IMixin self, string name, object value)
         {
-            self.GetStateInternal()[name] = value;
+            self.GetInternalState()[name] = value;
         }
 
         internal static object GetPropertyInternal(this IMixin self, string name)
         {
             object value;
-            var success = self.GetStateInternal().TryGetValue(name, out value);
+            var success = self.GetInternalState().TryGetValue(name, out value);
             return value;
         }
 
-        private static void StateChanging(object self, string name, object value)
+        private static bool StateChanging(object self, string name, object value)
         {
             var notifyStateChange = self as INotifyStateChange;
             if (notifyStateChange != null)
             {
                 StateChanging(notifyStateChange, name, value);
             }
+            var readOnly = self as IReadOnly;
+            if (readOnly != null && readOnly.IsReadOnly)
+            {
+                return false;
+            }
+            return true;
         }
 
         private static void StateChanged(object self, string name, object value)

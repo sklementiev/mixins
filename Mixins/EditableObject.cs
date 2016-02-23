@@ -26,7 +26,7 @@
         public static void EndEdit(this IEditableObject self)
         {
             // accept current state, discard old state
-            var state = self.GetStateInternal();
+            var state = self.GetInternalState();
             object clone;
             if (!state.TryGetValue(SystemFields.Shapshot, out clone)) return; // idempotent
             State.Remove(clone);
@@ -38,7 +38,7 @@
         public static void CancelEdit(this IEditableObject self)
         {
             // restore state from temporary storage, discard temporary state
-            var state = self.GetStateInternal();
+            var state = self.GetInternalState();
             object clone;
             if (!state.TryGetValue(SystemFields.Shapshot, out clone)) return; // idempotent
             ((IMapper) clone).MapTo(self, true);
