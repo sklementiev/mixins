@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Linq;
 
@@ -17,7 +18,7 @@ namespace Mixins
 
         public static dynamic GetValue(this IMixin self, [CallerMemberName] string name = null)
         {
-            return self.GetPropertyInternal(name);
+            return self.GetProperty(name);
         }
 
         public static void SetValue(this IMixin self, object value, [CallerMemberName] string name = null)
@@ -27,7 +28,13 @@ namespace Mixins
 
         public static object GetProperty(this IMixin self, string name)
         {
-            return self.GetPropertyInternal(name);
+            var type = self.GetPropertyType(name);
+            var value = self.GetPropertyInternal(name);
+            if (type != null && value == Value.Undefined)
+            {
+                return type.GetDefaultValue();
+            }
+            return value == Value.Undefined ? null : value;
         }
 
         public static IEnumerable<string> GetMembers(this IMixin self)
@@ -39,8 +46,8 @@ namespace Mixins
         {
             var property = self.GetType().GetProperty(name);
             if (property != null) return self.GetType().GetProperty(name).PropertyType;
-            var value = self.GetProperty(name);
-            return value == null ? null : value.GetType();
+            var value = self.GetPropertyInternal(name);
+            return value == null || value == Value.Undefined ? null : value.GetType();
         }
 
         private static object GetDefaultValue(this Type type)
@@ -79,11 +86,18 @@ namespace Mixins
             self.GetInternalState()[name] = value;
         }
 
+        [DebuggerDisplay("Undefined")]
+        internal class UndefinedValue {}
+
+        internal static class Value
+        {
+            public static readonly object Undefined = new UndefinedValue();
+        }
+
         internal static object GetPropertyInternal(this IMixin self, string name)
         {
             object value;
-            var success = self.GetInternalState().TryGetValue(name, out value);
-            return value;
+            return self.GetInternalState().TryGetValue(name, out value) ? value : Value.Undefined;
         }
 
         private static bool StateChanging(object self, string name, object value)

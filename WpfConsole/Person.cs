@@ -43,7 +43,7 @@ namespace WpfConsole
 
         public bool IsChanged
         {
-            get { return this.GetValue() ?? false; }
+            get { return this.GetValue(); }
         }
     }
 }

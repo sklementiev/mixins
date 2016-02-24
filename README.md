@@ -7,6 +7,9 @@ NuGet **Install-Package Mixins.NET**
 How often have you imagined to be able to extend class functionality without actually writing any code?
 
 Now you can! You can add required functionality to any class just by adding an interface definition to it!
+
+**No external libraries, no proxy magic, no compile-time MSIL weaving required!**
+
 You can freely add and mix any generic functionality/behaviours from mixins into your class.
 
 Example time!
@@ -26,7 +29,7 @@ Example time!
         }
     }
 
-As we can see this class is just marked with IMixin interface, there is no real implementation! Even interface itself is empty!
+As we can see this class is just marked with **IMixin** interface, there is no real implementation! Even interface itself is empty!
 
     public interface IMixin {}
 
@@ -56,7 +59,12 @@ Let's see what minimum functionality mixin provides
 
     Assert.IsTrue(banana.EqualsByValue(banana2));
 
-So every mixin can get set of properties it has, get or set a value and type of property by its name and can be compared with any other mixin by value.
+So every mixin can 
+
+- Get a list of properties it owns
+- Get or set a property value
+- Get a property type 
+- Can be compared with any other mixin by value. 
 
 Ok, it looks useful, but I want more! For example, let's say I want to clone mixins! Easy!
 
@@ -64,7 +72,7 @@ Ok, it looks useful, but I want more! For example, let's say I want to clone mix
     {
     }
 
-All we need to do is to mark our class with the mixin we need - ICloneable
+All we need to do is to mark our class with the mixin we need - **ICloneable**
 
     var banana = new CloneableProduct
     {
@@ -104,7 +112,7 @@ Prove it!
 
 How cool is that?
 
-There are so many options to create and reuse generic algorithms/behaviours when use mixins. For example - mapping. It is usual and mundane task to copy data from DTO object to ViewModel (espesially if they share the same property names) and with mixins help it's a breeze!
+There are so many options to create and reuse generic algorithms/behaviours when use mixins. For example - mapping. It is usual and mundane task to copy data from DTO object to ViewModel (especially if they share the same property names) and with mixins help it's a breeze!
 
     public class ProductDto : IMapper
     {
@@ -172,7 +180,7 @@ Let's see it in action
     Assert.AreEqual(2.5, banana.Price);
 
 Pretty neat, huh?
-Let's look at something more complex but useful. How about a mixin that can track changes to the object state and notify consumers (usually UI controls) on the fact that it has changes to be saved. Enters IChangeTracking!
+Let's look at something more complex but useful. How about a mixin that can track changes to the object state and notify consumers (usually UI controls) on the fact that it has changes to be saved. Enters **IChangeTracking**!
 
     public interface IChangeTracking : INotifyStateChange, IEditableObject
     {
@@ -215,7 +223,33 @@ Let's demo that
 
 You can run and explore WPF example project (WpfConsole) to see how it all works in real life.
 
-**The other interesting aspect is that mixins actually support dynamic objects as well!**
+There is another mixin we can showcase - **IReadOnly**. As name suggests we can make our instance read only when we want to!
+
+    public class ReadOnlyProduct : Product, IReadOnly
+    {
+        public bool IsReadOnly
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
+
+    var banana = new ReadOnlyProduct
+    {
+        Name = "Banana",
+        Price = new decimal(2.5)
+    };
+
+    banana.Name = "Apple";
+    Assert.AreNotEqual("Banana", banana.Name);
+    
+    banana.IsReadOnly = true;
+    banana.Name = "Mango";
+    Assert.AreEqual("Apple", banana.Name);
+
+
+
+**The other interesting aspect is that mixins actually fully support dynamic objects as well!**
 
 In that case we don't really care about property definitions and our code became something as trivial as this
 
@@ -234,6 +268,23 @@ In that case we don't really care about property definitions and our code became
     Assert.AreEqual(banana.Name, clone.Name);
     Assert.AreEqual(banana.Price, clone.Price);
 
+
+##The current list of Mixins
+
+**ICloneable** -Implements System.ICloneable, with deep clone ability. Deep clone will work only on ICloneable properties.
+
+**IReadOnly** - Makes your instance read only (immutable)
+
+**IMapper** - Transfers data between mixins using convention (same property names and compatible data types) 
+
+**IEditableObject** - Implementation of System.ComponentModel.IEditableObject
+
+**INotifyStateChange** - Implements System.ComponentModel.INotifyPropertyChanging and System.ComponentModel.INotifyPropertyChanged
+
+**IChangeTracking** - Implementation of System.ComponentModel.IRevertibleChangeTracking
+
+**IDisposable** - We can execute any custom action on object's disposal
+
 ----------
 
-###I would love to hear your ideas on how we can improve it, which new mixins should we create. Feel free to contribute! 
+##I would love to hear your ideas on how we can improve it, which new mixins should we create. Feel free to contribute! 
