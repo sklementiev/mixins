@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Mixins
 {
@@ -24,6 +26,7 @@ namespace Mixins
             {
                 var propertyValue = properties[propertyName];
                 object clonedValue;
+
                 if (propertyValue is ICloneable && deep)
                 {
                     ICloneable alreadyCloned;
@@ -35,6 +38,29 @@ namespace Mixins
                     {
                         clonedValue = ((ICloneable) propertyValue).CloneInternal(true, cloned);
                     }
+                }
+                else if (propertyValue is IEnumerable<ICloneable> && deep)
+                {
+                    // todo : arrays, observable collections etc
+                    var listType = typeof(List<>);
+                    var elementType = propertyValue.GetType().GetGenericArguments();
+                    var concreteType = listType.MakeGenericType(elementType);
+                    var clonedList = (IList)Activator.CreateInstance(concreteType);
+
+                    foreach (var item in (IEnumerable<ICloneable>)propertyValue)
+                    {
+                        ICloneable alreadyCloned;
+                        if (cloned.TryGetValue(item, out alreadyCloned))
+                        {
+                            clonedList.Add(alreadyCloned);
+                        }
+                        else
+                        {
+                            clonedList.Add(item.CloneInternal(true, cloned));
+                        }
+                    }
+
+                    clonedValue = clonedList;
                 }
                 else
                 {

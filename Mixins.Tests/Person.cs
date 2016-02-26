@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 
@@ -36,7 +37,7 @@ namespace Mixins.Tests
             set { this.SetValue(value); }
         }
 
-        public ObservableCollection<Person> Friends
+        public IEnumerable<Person> Friends
         {
             get { return this.GetValue(); }
             set { this.SetValue(value); }

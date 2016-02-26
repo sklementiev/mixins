@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace Mixins.Tests.Data
 {
@@ -97,7 +98,22 @@ namespace Mixins.Tests.Data
         }
     }
 
-    public class Wheel: IComposite
+    public class MultyCycle : IComposite
+    {
+        public string Name
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public IEnumerable<Wheel> Wheels
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
+
+    public class Wheel : IComposite
     {
         public string Brand
         {

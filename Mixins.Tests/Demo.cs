@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Mixins.Tests.Data;
 using NUnit.Framework;
 
@@ -180,6 +182,28 @@ namespace Mixins.Tests
 
             clone.FrontWheel.Brand = "Noname";
             Assert.IsFalse(bike.EqualsByValue(clone));
+        }
+
+        [Test]
+        public void CompositeWithSetOfPartsCompare()
+        {
+            var unicycle = new MultyCycle
+            {
+                Name = "Lightning",
+                Wheels = new List<Wheel> { new Wheel { Brand = "Dunlop" }}
+            };
+
+            var clone = unicycle.Clone(deep: true); // deep clone!
+
+            Assert.AreNotSame(unicycle, clone);
+            Assert.AreNotSame(unicycle.Wheels, clone.Wheels);
+            Assert.AreNotSame(unicycle.Wheels.First(), clone.Wheels.First());
+
+            // compare the whole bike with the clone including wheels
+            //Assert.IsTrue(unicycle.EqualsByValue(clone));
+
+            //clone.Wheels[0].Brand = "Noname";
+            //Assert.IsFalse(unicycle.EqualsByValue(clone));
         }
     }
 }
