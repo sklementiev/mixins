@@ -198,12 +198,13 @@ namespace Mixins.Tests
             Assert.AreNotSame(unicycle, clone);
             Assert.AreNotSame(unicycle.Wheels, clone.Wheels);
             Assert.AreNotSame(unicycle.Wheels.First(), clone.Wheels.First());
+            Assert.AreEqual(unicycle.Wheels.First().Brand, clone.Wheels.First().Brand);
 
             // compare the whole bike with the clone including wheels
-            //Assert.IsTrue(unicycle.EqualsByValue(clone));
+            Assert.IsTrue(unicycle.EqualsByValue(clone));
 
-            //clone.Wheels[0].Brand = "Noname";
-            //Assert.IsFalse(unicycle.EqualsByValue(clone));
+            clone.Wheels.First().Brand = "Noname";
+            Assert.IsFalse(unicycle.EqualsByValue(clone));
         }
     }
 }

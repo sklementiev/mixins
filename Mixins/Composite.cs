@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Mixins
 {
@@ -32,8 +33,17 @@ namespace Mixins
                 if (composite != null && otherComposite != null && !composite.EqualsByValue(otherComposite))
                 {
                     return false;
-                } 
-                if (composite == null && !Equals(value, otherValue))
+                }
+                var compositeList = value as IEnumerable<IComposite>;
+                var otherCompositeList = otherValue as IEnumerable<IComposite>;
+                if (compositeList != null && otherCompositeList != null)
+                {
+                    for (var i = 0; i < compositeList.ToList().Count(); i++)
+                    {
+                        if (!compositeList.ElementAt(i).EqualsByValue(otherCompositeList.ElementAt(i))) return false;
+                    }
+                }
+                if (composite == null && compositeList == null && !Equals(value, otherValue))
                 {
                     return false;
                 }
