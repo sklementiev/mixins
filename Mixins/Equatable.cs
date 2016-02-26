@@ -9,9 +9,11 @@ namespace Mixins
     {
         public static bool EqualsByValue(this IMixin self, IMixin other)
         {
-            return 
+            return
+                (self == null && other == null) || 
+                (self != null && other != null && 
                 self.GetMembers().Count() == other.GetMembers().Count() && 
-                self.GetMembers().All(name => Equals(self.GetProperty(name), other.GetProperty(name)));
+                self.GetMembers().All(name => Equals(self.GetProperty(name), other.GetProperty(name))));
         }
     }
 }

@@ -158,5 +158,28 @@ namespace Mixins.Tests
             banana.Name = "Mango";
             Assert.AreEqual("Apple", banana.Name);
         }
+
+        [Test]
+        public void CompositeCompare()
+        {
+            var bike = new Bicycle
+            {
+                Name = "Lightning",
+                FrontWheel = new Wheel { Brand = "Dunlop" },
+                RearWheel = new Wheel { Brand = "Michelin" }
+            };
+
+            var clone = bike.Clone(deep: true); // deep clone!
+            
+            Assert.AreNotSame(bike, clone);
+            Assert.AreNotSame(bike.FrontWheel, clone.FrontWheel);
+            Assert.AreNotSame(bike.RearWheel, clone.RearWheel);
+
+            // compare the whole bike with the clone including wheels
+            Assert.IsTrue(bike.EqualsByValue(clone));
+
+            clone.FrontWheel.Brand = "Noname";
+            Assert.IsFalse(bike.EqualsByValue(clone));
+        }
     }
 }
