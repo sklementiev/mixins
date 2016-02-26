@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Mixins.Tests.Data;
 using NUnit.Framework;
 
@@ -157,6 +159,52 @@ namespace Mixins.Tests
             banana.IsReadOnly = true;
             banana.Name = "Mango";
             Assert.AreEqual("Apple", banana.Name);
+        }
+
+        [Test]
+        public void CompositeCompare()
+        {
+            var bike = new Bicycle
+            {
+                Name = "Lightning",
+                FrontWheel = new Wheel { Brand = "Dunlop" },
+                RearWheel = new Wheel { Brand = "Michelin" }
+            };
+
+            var clone = bike.Clone(deep: true); // deep clone!
+            
+            Assert.AreNotSame(bike, clone);
+            Assert.AreNotSame(bike.FrontWheel, clone.FrontWheel);
+            Assert.AreNotSame(bike.RearWheel, clone.RearWheel);
+
+            // compare the whole bike with the clone including wheels
+            Assert.IsTrue(bike.EqualsByValue(clone));
+
+            clone.FrontWheel.Brand = "Noname";
+            Assert.IsFalse(bike.EqualsByValue(clone));
+        }
+
+        [Test]
+        public void CompositeWithSetOfPartsCompare()
+        {
+            var unicycle = new MultyCycle
+            {
+                Name = "Lightning",
+                Wheels = new List<Wheel> { new Wheel { Brand = "Dunlop" }}
+            };
+
+            var clone = unicycle.Clone(deep: true); // deep clone!
+
+            Assert.AreNotSame(unicycle, clone);
+            Assert.AreNotSame(unicycle.Wheels, clone.Wheels);
+            Assert.AreNotSame(unicycle.Wheels.First(), clone.Wheels.First());
+            Assert.AreEqual(unicycle.Wheels.First().Brand, clone.Wheels.First().Brand);
+
+            // compare the whole bike with the clone including wheels
+            Assert.IsTrue(unicycle.EqualsByValue(clone));
+
+            clone.Wheels.First().Brand = "Noname";
+            Assert.IsFalse(unicycle.EqualsByValue(clone));
         }
     }
 }

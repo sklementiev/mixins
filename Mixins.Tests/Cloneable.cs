@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Mixins.Tests
@@ -16,6 +18,17 @@ namespace Mixins.Tests
                 FirstName = "Bob",
                 LastName = "Minion",
                 DateOfBirth = DateTime.Parse("11/11/11"),
+                Friends = new List<Person>
+                {
+                    new Person
+                    {
+                        FirstName = "Kevin",
+                    },
+                    new Person
+                    {
+                        FirstName = "Stuart",
+                    }
+                } 
             };
         }
 
@@ -76,6 +89,18 @@ namespace Mixins.Tests
             Assert.AreNotSame(clone.RightHand, clone.LeftHand);
             Assert.AreSame(clone, clone.RightHand.Holds);
             Assert.AreSame(clone, clone.LeftHand.Holds);
+        }
+
+        [Test]
+        public void DeepCloneClonesWithLists()
+        {
+            var clone = person.Clone(true);
+            Assert.AreNotSame(person.Friends, clone.Friends);
+            Assert.AreEqual(person.Friends.Count(), clone.Friends.Count());
+            Assert.AreNotSame(person.Friends.First(), clone.Friends.First());
+            Assert.AreEqual(person.Friends.First().FirstName, clone.Friends.First().FirstName);
+            Assert.AreNotSame(person.Friends.Last(), clone.Friends.Last());
+            Assert.AreEqual(person.Friends.Last().FirstName, clone.Friends.Last().FirstName);
         }
     }
 }

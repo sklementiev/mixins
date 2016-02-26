@@ -27,5 +27,19 @@ namespace Mixins.Tests
             IMixin clone = person.Clone();
             Assert.IsTrue(person.EqualsByValue(clone));
         }
+
+        [Test]
+        public void NullMixinsAreEqualByValue()
+        {
+            var mixin = (IMixin)null;
+            var mixin2 = (IMixin)null;
+            Assert.IsTrue(mixin.EqualsByValue(mixin2));
+        }
+
+        [Test]
+        public void NullMixinAreNotEqualByValueToNonNullMixin()
+        {
+            Assert.IsFalse(person.EqualsByValue(null));
+        }
     }
 }
