@@ -84,7 +84,9 @@ All we need to do is to mark our class with the mixin we need - **ICloneable**
 
     Assert.IsTrue(banana.EqualsByValue(banana2));
 
-How easy is that? As we can see we can add any functionality we need just by adding an interface to a class! (Mixins even support deep cloning by the way)
+How easy is that? As we can see we can add any functionality we need just by adding an interface to a class! 
+
+> **ICloneable** mixin even supports **deep cloning**! Every property that is ICloneable or IEnumerable of ICloneable class will be cloned as well. It works recursively so your object graph can be as complex as you need.
 
 But I still want more! Something exciting! ) Ok, what if we suddenly want to get notifications on our object changes? Easy again!
 
@@ -247,7 +249,102 @@ There is another mixin we can showcase - **IReadOnly**. As name suggests we can 
     banana.Name = "Mango";
     Assert.AreEqual("Apple", banana.Name);
 
+Often we want to apply generic algorithms to complex object graphs, not just a simple flat classes. We have a solution for that!
 
+**IComposite** mixin can define that a class is a part complex entity constructed from other IComposite entities and lists.
+
+    public interface IComposite : ICloneable { }
+
+As you can see from that definition any composite entity can be deeple cloned. 
+Each composite can be (deeply) compared with any other, by comparing all its parts.
+Let's see an example!
+
+    public class Bicycle : IComposite
+    {
+        public string Name
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public Wheel FrontWheel
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public Wheel RearWheel
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
+
+    public class Wheel : IComposite
+    {
+        public string Brand
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
+
+    var bike = new Bicycle
+    {
+        Name = "Lightning",
+        FrontWheel = new Wheel { Brand = "Dunlop" },
+        RearWheel = new Wheel { Brand = "Michelin" }
+    };
+
+    var clone = bike.Clone(deep: true); // deep clone!
+    
+    Assert.AreNotSame(bike, clone);
+    Assert.AreNotSame(bike.FrontWheel, clone.FrontWheel);
+    Assert.AreNotSame(bike.RearWheel, clone.RearWheel);
+
+    // compare the whole bike with the clone including wheels
+    Assert.IsTrue(bike.EqualsByValue(clone));
+
+    clone.FrontWheel.Brand = "Noname";
+    Assert.IsFalse(bike.EqualsByValue(clone));
+
+Composites support lists as well
+
+    public class MultyCycle : IComposite
+    {
+        public string Name
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public IEnumerable<Wheel> Wheels
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
+
+    var unicycle = new MultyCycle
+    {
+        Name = "Lightning",
+        Wheels = new List<Wheel> { new Wheel { Brand = "Dunlop" }}
+    };
+
+    var clone = unicycle.Clone(deep: true); // deep clone!
+
+    Assert.AreNotSame(unicycle, clone);
+    Assert.AreNotSame(unicycle.Wheels, clone.Wheels);
+    Assert.AreNotSame(unicycle.Wheels.First(), clone.Wheels.First());
+    Assert.AreEqual(unicycle.Wheels.First().Brand, clone.Wheels.First().Brand);
+
+    // compare the whole bike with the clone including wheels
+    Assert.IsTrue(unicycle.EqualsByValue(clone));
+
+    clone.Wheels.First().Brand = "Noname";
+    Assert.IsFalse(unicycle.EqualsByValue(clone));
+
+Very impressive!
 
 **The other interesting aspect is that mixins actually fully support dynamic objects as well!**
 
@@ -271,19 +368,21 @@ In that case we don't really care about property definitions and our code became
 
 ##The current list of Mixins
 
-**ICloneable** -Implements System.ICloneable, with deep clone ability. Deep clone will work only on ICloneable properties.
+**ICloneable** - Implements System.ICloneable, with deep clone ability. Deep clone will work only on ICloneable properties.
 
 **IReadOnly** - Makes your instance read only (immutable)
 
 **IMapper** - Transfers data between mixins using convention (same property names and compatible data types) 
 
-**IEditableObject** - Implementation of System.ComponentModel.IEditableObject
+**IEditableObject** - Implementation of System.ComponentModel.IEditableObject. Allows to initiate editing session of object's state, accept or cancel changes
 
-**INotifyStateChange** - Implements System.ComponentModel.INotifyPropertyChanging and System.ComponentModel.INotifyPropertyChanged
+**INotifyStateChange** - Implements System.ComponentModel.INotifyPropertyChanging and System.ComponentModel.INotifyPropertyChanged. Notify of changes to object state (pre and post events per property)
 
-**IChangeTracking** - Implementation of System.ComponentModel.IRevertibleChangeTracking
+**IChangeTracking** - Implementation of System.ComponentModel.IRevertibleChangeTracking. Gives a flag that indicates that object actually has changes.
 
 **IDisposable** - We can execute any custom action on object's disposal
+
+**IComposite** - Mixin to define a "Composite" object or a part of a "Composite" object. Supports cloning and comparison for the whole composite (deep)
 
 ----------
 
