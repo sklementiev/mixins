@@ -251,12 +251,11 @@ There is another mixin we can showcase - **IReadOnly**. As name suggests we can 
 
 Often we want to apply generic algorithms to complex object graphs, not just a simple flat classes. We have a solution for that!
 
-**IComposite** mixin can define that a class is a part complex entity constructed from other IComposite entities and lists.
+**IComposite** mixin can define that a class is a part of complex entity constructed from other IComposite entities and lists.
 
     public interface IComposite : ICloneable { }
 
-As you can see from that definition any composite entity can be deeple cloned. 
-Each composite can be (deeply) compared with any other, by comparing all its parts.
+As you can see from that definition any composite entity can cloned as a whole (deep). Each composite can be (deeply) compared with any other, by comparing all its parts.
 Let's see an example!
 
     public class Bicycle : IComposite
@@ -308,7 +307,7 @@ Let's see an example!
     clone.FrontWheel.Brand = "Noname";
     Assert.IsFalse(bike.EqualsByValue(clone));
 
-Composites support lists as well
+Don't forget that composites support lists as well!
 
     public class MultyCycle : IComposite
     {
@@ -344,7 +343,7 @@ Composites support lists as well
     clone.Wheels.First().Brand = "Noname";
     Assert.IsFalse(unicycle.EqualsByValue(clone));
 
-Very impressive!
+This is very impressive!
 
 **The other interesting aspect is that mixins actually fully support dynamic objects as well!**
 
