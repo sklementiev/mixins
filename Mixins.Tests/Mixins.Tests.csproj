@@ -59,6 +59,7 @@
     <Compile Include="Cloneable.cs" />
     <Compile Include="Data\FooDynamic.cs" />
     <Compile Include="DynamicMixin.cs" />
+    <Compile Include="Composite.cs" />
     <Compile Include="Mapper.cs" />
     <Compile Include="Equatable.cs" />
     <Compile Include="Editable.cs" />

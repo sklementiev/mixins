@@ -38,7 +38,11 @@ namespace Mixins
                 var otherCompositeList = otherValue as IEnumerable<IComposite>;
                 if (compositeList != null && otherCompositeList != null)
                 {
-                    for (var i = 0; i < compositeList.ToList().Count(); i++)
+                    if (compositeList.Count() != otherCompositeList.Count())
+                    {
+                        return false;
+                    }
+                    for (var i = 0; i < compositeList.Count(); i++)
                     {
                         if (!compositeList.ElementAt(i).EqualsByValue(otherCompositeList.ElementAt(i))) return false;
                     }
