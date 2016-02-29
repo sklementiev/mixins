@@ -64,5 +64,38 @@ namespace Mixins.Tests
 
             Assert.IsFalse(tricycle.EqualsByValue(clone));
         }
+
+        [Test]
+        public void CompositesWithArraysCanBeClonedAndCompared()
+        {
+            var tricycle = new MultyCycle
+            {
+                Name = "Lightning",
+                Wheels = new [] { new Wheel { Brand = "Dunlop" }, new Wheel { Brand = "Dunlop" }, new Wheel { Brand = "Noname" } }
+            };
+
+            var clone = tricycle.Clone(deep: true); 
+            Assert.IsTrue(tricycle.EqualsByValue(clone));
+        }
+
+        [Test]
+        public void DynamicCompositesCanBeClonedAndCompared()
+        {
+            dynamic bike = new DynamicBicycle();
+            bike.Wheels = new List<Wheel> { new Wheel { Brand = "Noname" }, new Wheel { Brand = "Noname" } };
+            bike.Frame = new Frame();
+            bike.Frame.Type = "BMX";
+            var mixin = (IComposite) bike;
+
+            dynamic clone = mixin.Clone(deep: true);
+            Assert.AreNotSame(bike, clone);
+            Assert.AreNotSame(bike.Frame, clone.Frame);
+            Assert.AreNotSame(bike.Wheels, clone.Wheels);
+
+            Assert.IsTrue(mixin.EqualsByValue((IComposite)clone));
+
+            clone.Frame.Type = "Hybrid";
+            Assert.IsFalse(mixin.EqualsByValue((IComposite)clone));
+        }
    }
 }

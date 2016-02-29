@@ -30,12 +30,14 @@ namespace Mixins
 
                 var composite = value as IComposite;
                 var otherComposite = otherValue as IComposite;
+                // Composite property
                 if (composite != null && otherComposite != null && !composite.EqualsByValue(otherComposite))
                 {
                     return false;
                 }
                 var compositeList = value as IEnumerable<IComposite>;
                 var otherCompositeList = otherValue as IEnumerable<IComposite>;
+                // Composite list
                 if (compositeList != null && otherCompositeList != null)
                 {
                     if (compositeList.Count() != otherCompositeList.Count())
@@ -47,6 +49,7 @@ namespace Mixins
                         if (!compositeList.ElementAt(i).EqualsByValue(otherCompositeList.ElementAt(i))) return false;
                     }
                 }
+                // Simple property
                 if (composite == null && compositeList == null && !Equals(value, otherValue))
                 {
                     return false;

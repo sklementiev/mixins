@@ -121,4 +121,12 @@ namespace Mixins.Tests.Data
             set { this.SetValue(value); }
         }
     }
+
+    public class Frame : DynamicMixin, IComposite
+    {
+    }
+
+    public class DynamicBicycle : DynamicMixin, IComposite
+    {
+    }
 }
