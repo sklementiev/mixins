@@ -367,6 +367,23 @@ In that case we don't really care about property definitions and our code became
     Assert.AreEqual(banana.Name, clone.Name);
     Assert.AreEqual(banana.Price, clone.Price);
 
+```csharp
+dynamic bike = new DynamicBicycle();
+bike.Wheels = new List<Wheel> { new Wheel { Brand = "Noname" }, new Wheel { Brand = "Noname" } };
+bike.Frame = new Frame();
+bike.Frame.Type = "BMX";
+var mixin = (IComposite) bike;
+
+dynamic clone = mixin.Clone(deep: true);
+Assert.AreNotSame(bike, clone);
+Assert.AreNotSame(bike.Frame, clone.Frame);
+Assert.AreNotSame(bike.Wheels, clone.Wheels);
+
+Assert.IsTrue(mixin.EqualsByValue((IComposite)clone));
+
+clone.Frame.Type = "Hybrid";
+Assert.IsFalse(mixin.EqualsByValue((IComposite)clone));
+```
 
 ##The current list of Mixins
 
