@@ -129,4 +129,28 @@ namespace Mixins.Tests.Data
     public class DynamicBicycle : DynamicMixin, IComposite
     {
     }
+
+    public class Whole : IComposite, IEditableObject
+    {
+        public Part Part
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public IEnumerable<Part> Parts
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
+
+    public class Part : IComposite
+    {
+        public string Name
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
 }

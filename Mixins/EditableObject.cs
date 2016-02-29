@@ -18,7 +18,8 @@
             var state = self.GetPublicState();
             object temp;
             if (state.TryGetValue(SystemFields.Shapshot, out temp)) return; // idempotent
-            var clone = self.Clone();
+            var deepClone = self is IComposite;
+            var clone = self.Clone(deepClone);
             self.SetPropertyInternal(SystemFields.Shapshot, clone);
             self.SetPropertyInternal(SystemFields.IsChanged, false);
         }

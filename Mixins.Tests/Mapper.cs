@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Mixins.Tests.Data;
 using NUnit.Framework;
 
@@ -90,6 +91,34 @@ namespace Mixins.Tests
             Assert.AreEqual("Foo", bar.Name);
             Assert.AreEqual(null, bar.Tag);
             Assert.AreEqual(null, bar.Boo);
+        }
+
+        [Test]
+        public void CompositesCanMap()
+        {
+            var source = new Whole
+            {
+                Part = new Part { Name = "part1" },
+                Parts = new List<Part> { new Part { Name = "part2" }, new Part { Name = "part3" } }
+            };
+
+            var destination = new Whole();
+            source.MapTo(destination);
+            Assert.IsTrue(source.EqualsByValue(destination));
+        }
+
+        [Test]
+        public void CompositesWithArraysCanMap()
+        {
+            var source = new Whole
+            {
+                Part = new Part { Name = "part1" },
+                Parts = new [] { new Part { Name = "part2" }, new Part { Name = "part3" } }
+            };
+
+            var destination = new Whole();
+            source.MapTo(destination);
+            Assert.IsTrue(source.EqualsByValue(destination));
         }
     }
 }

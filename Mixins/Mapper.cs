@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mixins
 {
@@ -10,7 +12,7 @@ namespace Mixins
 
     public static partial class Extensions
     {
-        public static void MapTo(this IMapper self, IMixin destination, bool shapshot = false)
+        public static void MapTo(this IMapper self, IMixin destination, bool shapshot = false, bool deep = false)
         {
             if (shapshot)
             {
@@ -20,10 +22,53 @@ namespace Mixins
                     destination.SetProperty(prop, self.GetPropertyType(prop).GetDefaultValue());
                 }
             }
+            
             foreach (var name in self.GetMembers())
             {
                 var sourcePropType = self.GetPropertyType(name);
                 var destPropType = destination.GetPropertyType(name);
+                var sourceProperty = self.GetProperty(name);
+                var destinationPropety = destination.GetProperty(name);
+                // composite property
+                if (sourceProperty is IComposite)
+                {
+                    if (destinationPropety != null)
+                    {
+                        var mapper = (IMapper) sourceProperty;
+                        mapper.MapTo((IMixin)destinationPropety, shapshot, deep);
+                    }
+                    else
+                    {
+                        var cloner = (ICloneable) sourceProperty;
+                        destination.SetProperty(name, cloner.Clone(deep));
+                    }
+                    continue;
+                }
+                // composite list
+                if (sourceProperty is IEnumerable<IComposite>)
+                {
+                    var sourceList = sourceProperty as IEnumerable<IComposite>;
+                    IList destinationList;
+                    if (destinationPropety == null)
+                    {
+                        destinationList = sourceProperty.CloneTypedList();
+                        destination.SetProperty(name, destinationList);
+                    }
+                    else
+                    {
+                        // todo: arrays etc
+                        destinationList = (IList)destinationPropety;
+                        destinationList.Clear();
+                    }
+
+                    foreach (var item in sourceList)
+                    {
+                        destinationList.Add(item.Clone(deep));
+                    }
+                    
+                    continue;
+                }
+                // simple property
                 if (destPropType == null || sourcePropType == null || destPropType.IsAssignableFrom(sourcePropType)) // dynamic or compatible 
                 {
                     destination.SetProperty(name, self.GetProperty(name));

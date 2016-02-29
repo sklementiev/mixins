@@ -42,14 +42,7 @@ namespace Mixins
                 else if (propertyValue is IEnumerable<ICloneable> && deep)
                 {
                     // todo : observable collections etc
-                    var listType = typeof(List<>);
-                    var elementType = propertyValue.GetType().GetGenericArguments();
-                    if (!elementType.Any()) // array (we still create List for a clone)
-                    {
-                        elementType = new [] { propertyValue.GetType().GetElementType() };
-                    }
-                    var concreteType = listType.MakeGenericType(elementType);
-                    var clonedList = (IList)Activator.CreateInstance(concreteType);
+                    var clonedList = propertyValue.CloneTypedList();
 
                     foreach (var item in (IEnumerable<ICloneable>)propertyValue)
                     {

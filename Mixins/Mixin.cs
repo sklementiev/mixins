@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -54,6 +55,18 @@ namespace Mixins
         {
             if (type == null) return null;
             return type.IsValueType ? Activator.CreateInstance(type) : null;
+        }
+
+        private static IList CloneTypedList(this object propertyValue)
+        {
+            var listType = typeof(List<>);
+            var elementType = propertyValue.GetType().GetGenericArguments();
+            if (!elementType.Any()) // array (we still create List for a clone)
+            {
+                elementType = new[] { propertyValue.GetType().GetElementType() };
+            }
+            var concreteType = listType.MakeGenericType(elementType);
+            return (IList)Activator.CreateInstance(concreteType);
         }
 
         internal static void SetProperty(this IMixin self, string name, object value)

@@ -6,7 +6,7 @@ namespace Mixins
     /// <summary>
     /// Marker interface to specify a "Composite" object or a part of a "Composite" object
     /// </summary>
-    public interface IComposite : ICloneable { }
+    public interface IComposite : ICloneable, IMapper { }
 
     /// <summary>
     /// We can compare composite mixins by value

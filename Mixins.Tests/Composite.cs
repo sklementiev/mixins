@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Mixins.Tests.Data;
 using NUnit.Framework;
@@ -96,6 +97,47 @@ namespace Mixins.Tests
 
             clone.Frame.Type = "Hybrid";
             Assert.IsFalse(mixin.EqualsByValue((IComposite)clone));
+        }
+
+        [Test]
+        public void ChangesCanBeCanceled()
+        {
+            var foo = new Whole
+            {
+                Part = new Part { Name = "part1" },
+                Parts = new List<Part> { new Part { Name = "part2" }, new Part { Name = "part3" }}
+            };
+
+            var clone = foo.Clone(true);
+
+            foo.BeginEdit();
+            foo.Part.Name = "part1 changed";
+            foo.Parts.First().Name = "part2 changed";
+            foo.Parts.Last().Name = "part3 changed";
+            Assert.IsFalse(foo.EqualsByValue(clone));
+            foo.CancelEdit();
+
+            Assert.IsTrue(foo.EqualsByValue(clone));
+        }
+
+        [Test]
+        public void ChangesCanBeCanceledWhenNulled()
+        {
+            var foo = new Whole
+            {
+                Part = new Part { Name = "part1" },
+                Parts = new List<Part> { new Part { Name = "part2" }, new Part { Name = "part3" } }
+            };
+
+            var clone = foo.Clone(true);
+
+            foo.BeginEdit();
+            foo.Part = null;
+            foo.Parts = null;
+            Assert.IsFalse(foo.EqualsByValue(clone));
+            foo.CancelEdit();
+
+            Assert.IsTrue(foo.EqualsByValue(clone));
         }
    }
 }
