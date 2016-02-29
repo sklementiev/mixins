@@ -4,11 +4,11 @@ Mixins implementation in C#
 
 NuGet **Install-Package Mixins.NET**
 
-How often have you imagined to be able to extend class functionality without actually writing any code?
+How many times have you imagined to be able to extend class functionality without actually writing any code?
 
-Now you can! You can add required functionality to any class just by adding an interface definition to it!
+Now you can! You can add required functionality/behaviour to any class just by adding an interface definition to it!
 
-**No external libraries, no proxy magic, no compile-time MSIL weaving required!**
+**No external libraries, no proxy magic, no code-gen, no compile-time MSIL weaving required!**
 
 You can freely add and mix any generic functionality/behaviours from mixins into your class.
 
@@ -33,7 +33,10 @@ As we can see this class is just marked with **IMixin** interface, there is no r
 
     public interface IMixin {}
 
-You do not require to inherit from any base class! But you can, of course! The only prerequisite for mixins to work is getters and setters. They can contain any logic but in the end must call IMixin's extension methods GetValue() and SetValue(value).
+**You do not require to inherit from any base class!** But you can, of course! 
+
+> The only prerequisite for mixins to work is getters and setters. They can contain any logic but in the end must call IMixin's extension methods GetValue() and SetValue(value).
+
 
 Let's see what minimum functionality mixin provides
 
