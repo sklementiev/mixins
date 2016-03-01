@@ -12,7 +12,7 @@ namespace Mixins
 
     public static partial class Extensions
     {
-        public static void MapTo(this IMapper self, IMixin destination, bool shapshot = false, bool deep = false)
+        public static void MapTo(this IMapper self, IMixin destination, bool shapshot = false)
         {
             if (shapshot)
             {
@@ -35,12 +35,12 @@ namespace Mixins
                     if (destinationPropety != null)
                     {
                         var mapper = (IMapper) sourceProperty;
-                        mapper.MapTo((IMixin)destinationPropety, shapshot, deep);
+                        mapper.MapTo((IMixin)destinationPropety, shapshot);
                     }
                     else
                     {
                         var cloner = (ICloneable) sourceProperty;
-                        destination.SetProperty(name, cloner.Clone(deep));
+                        destination.SetProperty(name, cloner.Clone(true));
                     }
                     continue;
                 }
@@ -56,14 +56,13 @@ namespace Mixins
                     }
                     else
                     {
-                        // todo: arrays etc
                         destinationList = (IList)destinationPropety;
                         destinationList.Clear();
                     }
 
                     foreach (var item in sourceList)
                     {
-                        destinationList.Add(item.Clone(deep));
+                        destinationList.Add(item.Clone(true));
                     }
                     
                     continue;
