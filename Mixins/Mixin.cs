@@ -59,11 +59,16 @@ namespace Mixins
 
         private static IList CloneTypedList(this object propertyValue)
         {
+            return propertyValue.GetType().CloneTypedList();
+        }
+
+        private static IList CloneTypedList(this Type propertyType)
+        {
             var listType = typeof(List<>);
-            var elementType = propertyValue.GetType().GetGenericArguments();
+            var elementType = propertyType.GetGenericArguments();
             if (!elementType.Any()) // array (we still create List for a clone)
             {
-                elementType = new[] { propertyValue.GetType().GetElementType() };
+                elementType = new[] { propertyType.GetElementType() };
             }
             var concreteType = listType.MakeGenericType(elementType);
             return (IList)Activator.CreateInstance(concreteType);

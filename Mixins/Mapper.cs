@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +13,7 @@ namespace Mixins
 
     public static partial class Extensions
     {
-        public static void MapTo(this IMapper self, IMixin destination, bool shapshot = false)
+        public static void MapTo(this IMapper self, IMixin destination, bool shapshot = false, bool deep = false)
         {
             if (shapshot)
             {
@@ -29,42 +30,44 @@ namespace Mixins
                 var destPropType = destination.GetPropertyType(name);
                 var sourceProperty = self.GetProperty(name);
                 var destinationPropety = destination.GetProperty(name);
-                // composite property
-                if (sourceProperty is IComposite)
+                // property
+                if (sourceProperty is IMapper && deep)
                 {
-                    if (destinationPropety != null)
+                    var mapper = (IMapper)sourceProperty;
+                    if (destinationPropety == null && destPropType != null && typeof(IMixin).IsAssignableFrom(destPropType))
                     {
-                        var mapper = (IMapper) sourceProperty;
-                        mapper.MapTo((IMixin)destinationPropety, shapshot);
+                        destinationPropety = Activator.CreateInstance(destPropType);
+                        destination.SetProperty(name, destinationPropety);
                     }
-                    else
+                    if (destinationPropety is IMixin)
                     {
-                        var cloner = (ICloneable) sourceProperty;
-                        destination.SetProperty(name, cloner.Clone(true));
+                        mapper.MapTo((IMixin)destinationPropety, shapshot, deep);
                     }
                     continue;
                 }
-                // composite list
-                if (sourceProperty is IEnumerable<IComposite>)
+                // list
+                if (sourceProperty is IEnumerable<IMapper> && deep)
                 {
-                    var sourceList = sourceProperty as IEnumerable<IComposite>;
                     IList destinationList;
-                    if (destinationPropety == null)
+                    if (destinationPropety == null && destPropType != null && typeof(IEnumerable<IMixin>).IsAssignableFrom(destPropType))
                     {
-                        destinationList = sourceProperty.CloneTypedList();
+                        destinationList = destPropType.CloneTypedList();
                         destination.SetProperty(name, destinationList);
                     }
-                    else
+                    else if (destinationPropety is IEnumerable<IMixin>)
                     {
-                        destinationList = (IList)destinationPropety;
+                        destinationList = (IList) destinationPropety;
                         destinationList.Clear();
                     }
+                    else continue;
 
-                    foreach (var item in sourceList)
+                    var type = destinationList.GetType().GetGenericArguments().First();
+                    foreach (var item in (IEnumerable<IMapper>)sourceProperty)
                     {
-                        destinationList.Add(item.Clone(true));
+                        var destItem = (IMixin)Activator.CreateInstance(type);
+                        item.MapTo(destItem, shapshot, deep);
+                        destinationList.Add(destItem);
                     }
-                    
                     continue;
                 }
                 // simple property

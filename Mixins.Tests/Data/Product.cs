@@ -153,4 +153,28 @@ namespace Mixins.Tests.Data
             set { this.SetValue(value); }
         }
     }
+
+    public class VievModel : IMixin
+    {
+        public Item Part
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public IEnumerable<Item> Parts
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
+
+    public class Item : IComposite
+    {
+        public string Name
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+    }
 }
