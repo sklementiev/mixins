@@ -69,6 +69,41 @@ So every mixin can
 - Get a property type 
 - Can be compared with any other mixin by value. 
 
+When dealing with mixin state you are not limited with typed properties only, you can define any property with pretty much any name and value!
+
+```csharp
+var banana = new Product();
+banana.SetProperty("The place where it grows", "Africa");
+Assert.AreEqual("Africa", banana.GetProperty("The place where it grows"));
+```
+
+You can even create expando class using mixins!
+
+```csharp
+public class Expando : IMixin
+{
+    public object this[string name]
+    {
+        get
+        {
+            return this.GetProperty(name);
+        }
+        set
+        {
+            this.SetProperty(name, value);
+        }
+    }
+}
+
+var expando = new Expando();
+for (int i = 0; i < 10; i++)
+{
+    expando[i.ToString()] = i;
+    Assert.AreEqual(i, expando[i.ToString()]);
+}
+Console.WriteLine(expando.GetMembers().Sum(name => (int) expando[name])); // 45
+```
+
 Ok, it looks useful, but I want more! For example, let's say I want to clone mixins! Easy!
 
     public class CloneableProduct : Product, ICloneable
