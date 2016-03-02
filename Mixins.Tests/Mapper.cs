@@ -133,7 +133,9 @@ namespace Mixins.Tests
 
             var destination = new VievModel();
             source.MapTo(destination, deep: true);
+            Assert.AreNotSame(source.Part, destination.Part);
             Assert.AreEqual(source.Part.Name, destination.Part.Name);
+            Assert.AreNotSame(source.Parts, destination.Parts);
             Assert.AreEqual(source.Parts.Count(), destination.Parts.Count());
             Assert.AreEqual(source.Parts.First().Name, destination.Parts.First().Name);
             Assert.AreEqual(source.Parts.Last().Name, destination.Parts.Last().Name);

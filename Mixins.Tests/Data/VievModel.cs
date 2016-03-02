@@ -1,14 +1,16 @@
-﻿namespace Mixins.Tests.Data
+using System.Collections.Generic;
+
+namespace Mixins.Tests.Data
 {
-    public class Product : IMixin
+    public class VievModel : IMixin
     {
-        public string Name
+        public Item Part
         {
             get { return this.GetValue(); }
             set { this.SetValue(value); }
         }
 
-        public decimal Price
+        public IEnumerable<Item> Parts
         {
             get { return this.GetValue(); }
             set { this.SetValue(value); }

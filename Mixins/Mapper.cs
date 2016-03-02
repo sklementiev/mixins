@@ -41,7 +41,7 @@ namespace Mixins
                     }
                     if (destinationPropety is IMixin)
                     {
-                        mapper.MapTo((IMixin)destinationPropety, shapshot, deep);
+                        mapper.MapTo((IMixin)destinationPropety, shapshot, deep: true);
                     }
                     continue;
                 }
@@ -65,7 +65,7 @@ namespace Mixins
                     foreach (var item in (IEnumerable<IMapper>)sourceProperty)
                     {
                         var destItem = (IMixin)Activator.CreateInstance(type);
-                        item.MapTo(destItem, shapshot, deep);
+                        item.MapTo(destItem, shapshot, deep: true);
                         destinationList.Add(destItem);
                     }
                     continue;

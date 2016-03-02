@@ -57,6 +57,7 @@
     <Compile Include="Mixin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyName.cs" />
+    <Compile Include="SystemFields.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Mixins.nuspec" />

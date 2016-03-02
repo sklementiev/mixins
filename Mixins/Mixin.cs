@@ -29,6 +29,7 @@ namespace Mixins
 
         public static object GetProperty(this IMixin self, string name)
         {
+            EnsurePropertyName(ref name);
             var type = self.GetPropertyType(name);
             var value = self.GetPropertyInternal(name);
             if (type != null && value == Value.Undefined)
@@ -36,6 +37,15 @@ namespace Mixins
                 return type.GetDefaultValue();
             }
             return value == Value.Undefined ? null : value;
+        }
+
+        public static void SetProperty(this IMixin self, string name, object value)
+        {
+            EnsurePropertyName(ref name); 
+            if (Equals(value, self.GetProperty(name))) return;
+            if (!StateChanging(self, name, value)) return; // we can cancel state change
+            self.SetPropertyInternal(name, value);
+            StateChanged(self, name, value);
         }
 
         public static IEnumerable<string> GetMembers(this IMixin self)
@@ -49,6 +59,15 @@ namespace Mixins
             if (property != null) return self.GetType().GetProperty(name).PropertyType;
             var value = self.GetPropertyInternal(name);
             return value == null || value == Value.Undefined ? null : value.GetType();
+        }
+
+        private static void EnsurePropertyName(ref string name)
+        {
+            name = name.Trim();
+            if (name.StartsWith(SystemFields.Prefix))
+            {
+                throw new Exception("Property name cannot start with #");
+            }
         }
 
         private static object GetDefaultValue(this Type type)
@@ -74,28 +93,15 @@ namespace Mixins
             return (IList)Activator.CreateInstance(concreteType);
         }
 
-        internal static void SetProperty(this IMixin self, string name, object value)
-        {
-            if (Equals(value, self.GetProperty(name))) return;
-            if (!StateChanging(self, name, value)) return; // we can cancel state change
-            self.SetPropertyInternal(name, value);
-            StateChanged(self, name, value);
-        }
-
         internal static Dictionary<string, object> GetInternalState(this IMixin self)
         {
             return State.GetOrCreateValue(self);
         }
 
-        private static partial class SystemFields
-        {
-            public const char Prefix = '#';
-        }
-
         internal static Dictionary<string, object> GetPublicState(this IMixin self)
         {
             return self.GetInternalState()
-                .Where(c => c.Key.First() != SystemFields.Prefix && c.Key != SystemFields.IsChanged)
+                .Where(c => !c.Key.StartsWith(SystemFields.Prefix) && c.Key != SystemFields.IsChanged)
                 .ToDictionary(c => c.Key, c => c.Value);
         }
 

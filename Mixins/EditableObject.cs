@@ -7,11 +7,6 @@
     /// </summary>
     public static partial class Extensions
     {
-        private static partial class SystemFields
-        {
-            public const string Shapshot = "#shapshot";
-        }
-
         public static void BeginEdit(this IEditableObject self)
         {
             // store current state to temporary storage

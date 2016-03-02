@@ -1,6 +1,6 @@
 ﻿namespace Mixins.Tests.Data
 {
-    public class Product : IMixin
+    public class Bicycle : IComposite
     {
         public string Name
         {
@@ -8,7 +8,13 @@
             set { this.SetValue(value); }
         }
 
-        public decimal Price
+        public Wheel FrontWheel
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public Wheel RearWheel
         {
             get { return this.GetValue(); }
             set { this.SetValue(value); }

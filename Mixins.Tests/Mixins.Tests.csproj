@@ -52,7 +52,25 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Expando.cs" />
+    <Compile Include="Data\Bicycle.cs" />
+    <Compile Include="Data\CloneableProduct.cs" />
+    <Compile Include="Data\DynamicBicycle.cs" />
+    <Compile Include="Data\EditableProduct.cs" />
+    <Compile Include="Data\Frame.cs" />
+    <Compile Include="Data\Item.cs" />
+    <Compile Include="Data\MultyCycle.cs" />
+    <Compile Include="Data\Part.cs" />
     <Compile Include="Data\Product.cs" />
+    <Compile Include="Data\ProductDto.cs" />
+    <Compile Include="Data\ProductDynamic.cs" />
+    <Compile Include="Data\ProductWithChangeNotification.cs" />
+    <Compile Include="Data\ProductWithChangeTracking.cs" />
+    <Compile Include="Data\ReadOnlyProduct.cs" />
+    <Compile Include="Data\VievModel.cs" />
+    <Compile Include="Data\Wheel.cs" />
+    <Compile Include="Data\Whole.cs" />
+    <Compile Include="Mixin.cs" />
     <Compile Include="Demo.cs" />
     <Compile Include="Data\BarDynamic.cs" />
     <Compile Include="Data\Bar.cs" />
