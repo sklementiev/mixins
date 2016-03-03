@@ -1,10 +1,10 @@
-# Mixins [![Build status](https://ci.appveyor.com/api/projects/status/2dmaheiwr8s9phnl?svg=true)](https://ci.appveyor.com/project/sklementiev/mixins)
+# Mixins.NET [![Build status](https://ci.appveyor.com/api/projects/status/2dmaheiwr8s9phnl?svg=true)](https://ci.appveyor.com/project/sklementiev/mixins)
 
 Mixins implementation in C#
 
 NuGet **Install-Package Mixins.NET**
 
-How many times have you imagined to be able to extend class functionality without actually writing any code?
+*Have you ever wanted to be able to extend class functionality without actually writing any code?*
 
 Now you can! You can add required functionality/behaviour to any class just by adding an interface definition to it!
 
@@ -243,6 +243,7 @@ Assert.AreEqual(2.5, banana.Price);
 ```
 
 Pretty neat, huh?
+
 Let's look at something more complex but useful. How about a mixin that can track changes to the object state and notify consumers (usually UI controls) on the fact that it has changes to be saved. Enters **IChangeTracking**!
 
 ```csharp
