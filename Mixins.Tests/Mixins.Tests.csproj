@@ -69,6 +69,7 @@
     <Compile Include="Data\ReadOnlyProduct.cs" />
     <Compile Include="Data\VievModel.cs" />
     <Compile Include="Data\Wheel.cs" />
+    <Compile Include="Data\Composite.cs" />
     <Compile Include="Data\Whole.cs" />
     <Compile Include="Mixin.cs" />
     <Compile Include="Demo.cs" />

@@ -13,7 +13,7 @@ namespace Mixins
     /// </summary>
     public static partial class Extensions
     {
-        public static bool EqualsByValue(this IComposite self, IComposite other)
+        internal static bool EqualsByValueInternal(this IComposite self, IComposite other, IDictionary<IComposite, object> path)
         {
             if (self == null && other == null) return true;
             if (self == null || other == null) return false;
@@ -23,15 +23,19 @@ namespace Mixins
                 return false;
             }
             
+            path.Add(self, null);
+
             foreach (var member in self.GetMembers())
             {
                 var value = self.GetProperty(member);
                 var otherValue = other.GetProperty(member);
 
                 var composite = value as IComposite;
+                if (composite != null && path.ContainsKey(composite)) continue; // prevent circular refs
+
                 var otherComposite = otherValue as IComposite;
                 // Composite property
-                if (composite != null && otherComposite != null && !composite.EqualsByValue(otherComposite))
+                if (composite != null && otherComposite != null && !composite.EqualsByValueInternal(otherComposite, path))
                 {
                     return false;
                 }
@@ -46,7 +50,9 @@ namespace Mixins
                     }
                     for (var i = 0; i < compositeList.Count(); i++)
                     {
-                        if (!compositeList.ElementAt(i).EqualsByValue(otherCompositeList.ElementAt(i))) return false;
+                        var item = compositeList.ElementAt(i);
+                        if (path.ContainsKey(item)) continue; // prevent circular refs
+                        if (!item.EqualsByValueInternal(otherCompositeList.ElementAt(i), path)) return false;
                     }
                 }
                 // Simple property
@@ -56,6 +62,11 @@ namespace Mixins
                 }
             }
             return true;
+        }
+
+        public static bool EqualsByValue(this IComposite self, IComposite other)
+        {
+            return self.EqualsByValueInternal(other, new Dictionary<IComposite, object>());
         }
     }
 }

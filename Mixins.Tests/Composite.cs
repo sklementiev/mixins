@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Mixins.Tests.Data;
 using NUnit.Framework;
@@ -7,7 +6,7 @@ using NUnit.Framework;
 namespace Mixins.Tests
 {
     [TestFixture]
-    public class Composite
+    public class CompositeTests
     {
         [Test]
         public void EmptyCompositesAreEqual()
@@ -138,6 +137,29 @@ namespace Mixins.Tests
             foo.CancelEdit();
 
             Assert.IsTrue(foo.EqualsByValue(clone));
+        }
+
+        [Test]
+        public void WhenPropertyCreatesCircularRefEqualsWorks()
+        {
+            var composite = new Composite();
+            composite.Part = composite;
+            var clone = composite.Clone(true);
+            Assert.IsTrue(composite.EqualsByValue(clone));
+        }
+
+        [Test]
+        public void WhenListElementCreatesCircularRefEqualsWorks()
+        {
+            var composite = new Composite
+            {
+                Name = "Body",
+                Part = new Composite { Name = "Part" }
+            };
+
+            composite.Parts = new[] { composite };
+            var clone = composite.Clone(true);
+            Assert.IsTrue(composite.EqualsByValue(clone));
         }
    }
 }
