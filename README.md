@@ -1,10 +1,10 @@
-# Mixins [![Build status](https://ci.appveyor.com/api/projects/status/2dmaheiwr8s9phnl?svg=true)](https://ci.appveyor.com/project/sklementiev/mixins)
+# Mixins.NET [![Build status](https://ci.appveyor.com/api/projects/status/2dmaheiwr8s9phnl?svg=true)](https://ci.appveyor.com/project/sklementiev/mixins)
 
 Mixins implementation in C#
 
 NuGet **Install-Package Mixins.NET**
 
-How many times have you imagined to be able to extend class functionality without actually writing any code?
+*Have you ever wanted to be able to extend class functionality without actually writing any code?*
 
 Now you can! You can add required functionality/behaviour to any class just by adding an interface definition to it!
 
@@ -14,24 +14,28 @@ You can freely add and mix any generic functionality/behaviours from mixins into
 
 Example time!
 
-    public class Product : IMixin
+```csharp
+public class Product : IMixin
+{
+    public string Name
     {
-        public string Name
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
-
-        public decimal Price
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
     }
+
+    public decimal Price
+    {
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
+    }
+}
+```
 
 As we can see this class is just marked with **IMixin** interface, there is no real implementation! Even interface itself is empty!
 
-    public interface IMixin {}
+```csharp
+public interface IMixin {}
+```
 
 **You do not require to inherit from any base class!** But you can, of course! 
 
@@ -40,27 +44,29 @@ As we can see this class is just marked with **IMixin** interface, there is no r
 
 Let's see what minimum functionality mixin provides
 
-    var banana = new Product
-    {
-        Name = "Banana",
-        Price = new decimal(2.5)
-    };
+```csharp
+var banana = new Product
+{
+    Name = "Banana",
+    Price = new decimal(2.5)
+};
 
-    var members = banana.GetMembers();
-    foreach (var member in members)
-    {
-        var value = banana.GetProperty(member);
-        var type = banana.GetPropertyType(member);
-        Console.WriteLine("{0} = {1} of type {2}", member, value, type);
-    }
+var members = banana.GetMembers();
+foreach (var member in members)
+{
+    var value = banana.GetProperty(member);
+    var type = banana.GetPropertyType(member);
+    Console.WriteLine("{0} = {1} of type {2}", member, value, type);
+}
 
-    var banana2 = new Product
-    {
-        Name = "Banana",
-        Price = new decimal(2.5)
-    };
+var banana2 = new Product
+{
+    Name = "Banana",
+    Price = new decimal(2.5)
+};
 
-    Assert.IsTrue(banana.EqualsByValue(banana2));
+Assert.IsTrue(banana.EqualsByValue(banana2));
+```
 
 So every mixin can 
 
@@ -69,23 +75,62 @@ So every mixin can
 - Get a property type 
 - Can be compared with any other mixin by value. 
 
+When dealing with mixin state you are not limited with typed properties only, you can define any property with pretty much any name and value!
+
+```csharp
+var banana = new Product();
+banana.SetProperty("The place where it grows", "Africa");
+Assert.AreEqual("Africa", banana.GetProperty("The place where it grows"));
+```
+
+You can even create expando class using mixins!
+
+```csharp
+public class Expando : IMixin
+{
+    public object this[string name]
+    {
+        get
+        {
+            return this.GetProperty(name);
+        }
+        set
+        {
+            this.SetProperty(name, value);
+        }
+    }
+}
+
+var expando = new Expando();
+for (int i = 0; i < 10; i++)
+{
+    expando[i.ToString()] = i;
+    Assert.AreEqual(i, expando[i.ToString()]);
+}
+Console.WriteLine(expando.GetMembers().Sum(name => (int) expando[name])); // 45
+```
+
 Ok, it looks useful, but I want more! For example, let's say I want to clone mixins! Easy!
 
-    public class CloneableProduct : Product, ICloneable
-    {
-    }
+```csharp
+public class CloneableProduct : Product, ICloneable
+{
+}
+```
 
 All we need to do is to mark our class with the mixin we need - **ICloneable**
 
-    var banana = new CloneableProduct
-    {
-        Name = "Banana",
-        Price = new decimal(2.5)
-    };
+```csharp
+var banana = new CloneableProduct
+{
+    Name = "Banana",
+    Price = new decimal(2.5)
+};
 
-    var banana2 = banana.Clone();
+var banana2 = banana.Clone();
 
-    Assert.IsTrue(banana.EqualsByValue(banana2));
+Assert.IsTrue(banana.EqualsByValue(banana2));
+```
 
 How easy is that? As we can see we can add any functionality we need just by adding an interface to a class! 
 
@@ -93,258 +138,285 @@ How easy is that? As we can see we can add any functionality we need just by add
 
 But I still want more! Something exciting! ) Ok, what if we suddenly want to get notifications on our object changes? Easy again!
 
-
-    public class ProductWithChangeNotification : Product, INotifyStateChange
-    {
-        public event PropertyChangingEventHandler PropertyChanging;
-        public event PropertyChangedEventHandler PropertyChanged;
-    }
+```csharp
+public class ProductWithChangeNotification : Product, INotifyStateChange
+{
+    public event PropertyChangingEventHandler PropertyChanging;
+    public event PropertyChangedEventHandler PropertyChanged;
+}
+```
 
 Prove it!
 
-    var banana = new ProductWithChangeNotification
-    {
-        Name = "Banana",
-        Price = new decimal(2.5)
-    };
+```csharp
+var banana = new ProductWithChangeNotification
+{
+    Name = "Banana",
+    Price = new decimal(2.5)
+};
 
-    banana.PropertyChanged += (sender, args) =>
-    {
-        Console.WriteLine("{0} changed to {1}", args.PropertyName, banana.GetProperty(args.PropertyName));
-    };
+banana.PropertyChanged += (sender, args) =>
+{
+    Console.WriteLine("{0} changed to {1}", args.PropertyName, banana.GetProperty(args.PropertyName));
+};
 
-    banana.Price = 3; // prints "Price changed to 3"
+banana.Price = 3; // prints "Price changed to 3"
+```
 
 How cool is that?
 
 There are so many options to create and reuse generic algorithms/behaviours when use mixins. For example - mapping. It is usual and mundane task to copy data from DTO object to ViewModel (especially if they share the same property names) and with mixins help it's a breeze!
 
-    public class ProductDto : IMapper
+```csharp
+public class ProductDto : IMapper
+{
+    public string Name
     {
-        public string Name
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
-
-        public decimal Price
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
-
-        public string ProducedBy
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
     }
+
+    public decimal Price
+    {
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
+    }
+
+    public string ProducedBy
+    {
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
+    }
+}
+```
 
 Let's transfer data to the other mixin based on the same property names and compatible types.
 
-    var bananaDto = new ProductDto
-    {
-        Name = "Banana",
-        Price = new decimal(2.5),
-        ProducedBy = "Banana tree"
-    };
+```csharp
+var bananaDto = new ProductDto
+{
+    Name = "Banana",
+    Price = new decimal(2.5),
+    ProducedBy = "Banana tree"
+};
 
-    var banana = new Product();
+var banana = new Product();
 
-    bananaDto.MapTo(banana);
+bananaDto.MapTo(banana);
 
-    Assert.AreEqual(bananaDto.Name, banana.Name);
-    Assert.AreEqual(bananaDto.Price, banana.Price);
+Assert.AreEqual(bananaDto.Name, banana.Name);
+Assert.AreEqual(bananaDto.Price, banana.Price);
+```
 
 Amazing, isn't it?
 
 The other common behaviour that we can get for free with mixins is implementation of System.ComponentModel.IEditableObject interface. It allows object to accept or reject changes to its state.
 
-    public class EditableProduct : Product, IEditableObject
-    {
-    }
+```csharp
+public class EditableProduct : Product, IEditableObject
+{
+}
+```
 
 Note that IEditableObject is a mixin that composed from two other mixins!
 
-    public interface IEditableObject : ICloneable, IMapper {}
+```csharp
+public interface IEditableObject : ICloneable, IMapper {}
+```
 
 Let's see it in action
 
-    var banana = new EditableProduct
-    {
-        Name = "Banana",
-        Price = new decimal(2.5)
-    };
+```csharp
+var banana = new EditableProduct
+{
+    Name = "Banana",
+    Price = new decimal(2.5)
+};
 
-    banana.BeginEdit();
-    banana.Name = "Apple";
-    banana.Price = 7;
-    banana.CancelEdit();
+banana.BeginEdit();
+banana.Name = "Apple";
+banana.Price = 7;
+banana.CancelEdit();
 
-    Assert.AreEqual("Banana", banana.Name);
-    Assert.AreEqual(2.5, banana.Price);
+Assert.AreEqual("Banana", banana.Name);
+Assert.AreEqual(2.5, banana.Price);
+```
 
 Pretty neat, huh?
+
 Let's look at something more complex but useful. How about a mixin that can track changes to the object state and notify consumers (usually UI controls) on the fact that it has changes to be saved. Enters **IChangeTracking**!
 
-    public interface IChangeTracking : INotifyStateChange, IEditableObject
-    {
-        bool IsChanged { get; }
-    }
+```csharp
+public interface IChangeTracking : INotifyStateChange, IEditableObject
+{
+    bool IsChanged { get; }
+}
+```
 
 Our product class will become
 
-    public class ProductWithChangeTracking : Product, IChangeTracking
+```csharp
+public class ProductWithChangeTracking : Product, IChangeTracking
+{
+    public event PropertyChangingEventHandler PropertyChanging;
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public bool IsChanged
     {
-        public event PropertyChangingEventHandler PropertyChanging;
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public bool IsChanged
-        {
-            get { return this.GetValue(); }
-        }
+        get { return this.GetValue(); }
     }
-
+}
+```
 
 Let's demo that
 
-    var banana = new ProductWithChangeTracking
-    {
-        Name = "Banana",
-        Price = new decimal(2.5)
-    };
+```csharp
+var banana = new ProductWithChangeTracking
+{
+    Name = "Banana",
+    Price = new decimal(2.5)
+};
 
-    banana.PropertyChanged += (sender, args) =>
-    {
-        if (args.PropertyName != "IsChanged") return;
-        Console.WriteLine("{0} = {1}", args.PropertyName, banana.GetProperty(args.PropertyName));
-    };
+banana.PropertyChanged += (sender, args) =>
+{
+    if (args.PropertyName != "IsChanged") return;
+    Console.WriteLine("{0} = {1}", args.PropertyName, banana.GetProperty(args.PropertyName));
+};
 
-    banana.BeginEdit();
-    banana.Name = "Apple";  // prints IsChanged = true
-    banana.Name = "Banana"; // prints IsChanged = false
-    banana.Price = 5;       // prints IsChanged = true
-    banana.CancelEdit();    // prints IsChanged = false
+banana.BeginEdit();
+banana.Name = "Apple";  // prints IsChanged = true
+banana.Name = "Banana"; // prints IsChanged = false
+banana.Price = 5;       // prints IsChanged = true
+banana.CancelEdit();    // prints IsChanged = false
+```
 
 You can run and explore WPF example project (WpfConsole) to see how it all works in real life.
 
 There is another mixin we can showcase - **IReadOnly**. As name suggests we can make our instance read only when we want to!
 
-    public class ReadOnlyProduct : Product, IReadOnly
+```csharp
+public class ReadOnlyProduct : Product, IReadOnly
+{
+    public bool IsReadOnly
     {
-        public bool IsReadOnly
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
     }
+}
 
-    var banana = new ReadOnlyProduct
-    {
-        Name = "Banana",
-        Price = new decimal(2.5)
-    };
+var banana = new ReadOnlyProduct
+{
+    Name = "Banana",
+    Price = new decimal(2.5)
+};
 
-    banana.Name = "Apple";
-    Assert.AreNotEqual("Banana", banana.Name);
-    
-    banana.IsReadOnly = true;
-    banana.Name = "Mango";
-    Assert.AreEqual("Apple", banana.Name);
+banana.Name = "Apple";
+Assert.AreNotEqual("Banana", banana.Name);
+
+banana.IsReadOnly = true;
+banana.Name = "Mango";
+Assert.AreEqual("Apple", banana.Name);
+```
 
 Often we want to apply generic algorithms to complex object graphs, not just a simple flat classes. We have a solution for that!
 
 **IComposite** mixin can define that a class is a part of complex entity constructed from other IComposite entities and lists.
 
-    public interface IComposite : ICloneable { }
+```csharp
+public interface IComposite : ICloneable { }
+```
 
 As you can see from that definition any composite entity can cloned as a whole (deep). Each composite can be (deeply) compared with any other, by comparing all its parts.
 Let's see an example!
 
-    public class Bicycle : IComposite
+```csharp
+public class Bicycle : IComposite
+{
+    public string Name
     {
-        public string Name
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
-
-        public Wheel FrontWheel
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
-
-        public Wheel RearWheel
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
     }
 
-    public class Wheel : IComposite
+    public Wheel FrontWheel
     {
-        public string Brand
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
     }
 
-    var bike = new Bicycle
+    public Wheel RearWheel
     {
-        Name = "Lightning",
-        FrontWheel = new Wheel { Brand = "Dunlop" },
-        RearWheel = new Wheel { Brand = "Michelin" }
-    };
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
+    }
+}
 
-    var clone = bike.Clone(deep: true); // deep clone!
-    
-    Assert.AreNotSame(bike, clone);
-    Assert.AreNotSame(bike.FrontWheel, clone.FrontWheel);
-    Assert.AreNotSame(bike.RearWheel, clone.RearWheel);
+public class Wheel : IComposite
+{
+    public string Brand
+    {
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
+    }
+}
 
-    // compare the whole bike with the clone including wheels
-    Assert.IsTrue(bike.EqualsByValue(clone));
+var bike = new Bicycle
+{
+    Name = "Lightning",
+    FrontWheel = new Wheel { Brand = "Dunlop" },
+    RearWheel = new Wheel { Brand = "Michelin" }
+};
 
-    clone.FrontWheel.Brand = "Noname";
-    Assert.IsFalse(bike.EqualsByValue(clone));
+var clone = bike.Clone(deep: true); // deep clone!
+
+Assert.AreNotSame(bike, clone);
+Assert.AreNotSame(bike.FrontWheel, clone.FrontWheel);
+Assert.AreNotSame(bike.RearWheel, clone.RearWheel);
+
+// compare the whole bike with the clone including wheels
+Assert.IsTrue(bike.EqualsByValue(clone));
+
+clone.FrontWheel.Brand = "Noname";
+Assert.IsFalse(bike.EqualsByValue(clone));
+```
 
 Don't forget that composites support lists as well!
 
-    public class MultyCycle : IComposite
+```csharp
+public class MultyCycle : IComposite
+{
+    public string Name
     {
-        public string Name
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
-
-        public IEnumerable<Wheel> Wheels
-        {
-            get { return this.GetValue(); }
-            set { this.SetValue(value); }
-        }
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
     }
 
-    var unicycle = new MultyCycle
+    public IEnumerable<Wheel> Wheels
     {
-        Name = "Lightning",
-        Wheels = new List<Wheel> { new Wheel { Brand = "Dunlop" }}
-    };
+        get { return this.GetValue(); }
+        set { this.SetValue(value); }
+    }
+}
 
-    var clone = unicycle.Clone(deep: true); // deep clone!
+var unicycle = new MultyCycle
+{
+    Name = "Lightning",
+    Wheels = new List<Wheel> { new Wheel { Brand = "Dunlop" }}
+};
 
-    Assert.AreNotSame(unicycle, clone);
-    Assert.AreNotSame(unicycle.Wheels, clone.Wheels);
-    Assert.AreNotSame(unicycle.Wheels.First(), clone.Wheels.First());
-    Assert.AreEqual(unicycle.Wheels.First().Brand, clone.Wheels.First().Brand);
+var clone = unicycle.Clone(deep: true); // deep clone!
 
-    // compare the whole bike with the clone including wheels
-    Assert.IsTrue(unicycle.EqualsByValue(clone));
+Assert.AreNotSame(unicycle, clone);
+Assert.AreNotSame(unicycle.Wheels, clone.Wheels);
+Assert.AreNotSame(unicycle.Wheels.First(), clone.Wheels.First());
+Assert.AreEqual(unicycle.Wheels.First().Brand, clone.Wheels.First().Brand);
 
-    clone.Wheels.First().Brand = "Noname";
-    Assert.IsFalse(unicycle.EqualsByValue(clone));
+// compare the whole bike with the clone including wheels
+Assert.IsTrue(unicycle.EqualsByValue(clone));
+
+clone.Wheels.First().Brand = "Noname";
+Assert.IsFalse(unicycle.EqualsByValue(clone));
+```
 
 This is very impressive!
 
@@ -352,21 +424,41 @@ This is very impressive!
 
 In that case we don't really care about property definitions and our code became something as trivial as this
 
-    public class ProductDynamic : DynamicMixin, ICloneable
-    {
-    }
+```csharp
+public class ProductDynamic : DynamicMixin, ICloneable
+{
+}
 
-    dynamic banana = new ProductDynamic();
-    banana.Name = "Banana";
-    banana.Price = new decimal(2.5);
-    
-    ICloneable mixin = banana;
-    dynamic clone = mixin.Clone();
-    
-    Assert.AreNotSame(banana, clone);
-    Assert.AreEqual(banana.Name, clone.Name);
-    Assert.AreEqual(banana.Price, clone.Price);
+dynamic banana = new ProductDynamic();
+banana.Name = "Banana";
+banana.Price = new decimal(2.5);
 
+ICloneable mixin = banana;
+dynamic clone = mixin.Clone();
+
+Assert.AreNotSame(banana, clone);
+Assert.AreEqual(banana.Name, clone.Name);
+Assert.AreEqual(banana.Price, clone.Price);
+```
+Composites are supported as well!
+
+```csharp
+dynamic bike = new DynamicBicycle();
+bike.Wheels = new List<Wheel> { new Wheel { Brand = "Noname" }, new Wheel { Brand = "Noname" } };
+bike.Frame = new Frame();
+bike.Frame.Type = "BMX";
+var mixin = (IComposite) bike;
+
+dynamic clone = mixin.Clone(deep: true);
+Assert.AreNotSame(bike, clone);
+Assert.AreNotSame(bike.Frame, clone.Frame);
+Assert.AreNotSame(bike.Wheels, clone.Wheels);
+
+Assert.IsTrue(mixin.EqualsByValue((IComposite)clone));
+
+clone.Frame.Type = "Hybrid";
+Assert.IsFalse(mixin.EqualsByValue((IComposite)clone));
+```
 
 ##The current list of Mixins
 

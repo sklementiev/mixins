@@ -7,18 +7,14 @@
     /// </summary>
     public static partial class Extensions
     {
-        private static partial class SystemFields
-        {
-            public const string Shapshot = "#shapshot";
-        }
-
         public static void BeginEdit(this IEditableObject self)
         {
             // store current state to temporary storage
             var state = self.GetPublicState();
             object temp;
             if (state.TryGetValue(SystemFields.Shapshot, out temp)) return; // idempotent
-            var clone = self.Clone();
+            var deepClone = self is IComposite;
+            var clone = self.Clone(deepClone);
             self.SetPropertyInternal(SystemFields.Shapshot, clone);
             self.SetPropertyInternal(SystemFields.IsChanged, false);
         }
@@ -41,7 +37,7 @@
             var state = self.GetInternalState();
             object clone;
             if (!state.TryGetValue(SystemFields.Shapshot, out clone)) return; // idempotent
-            ((IMapper) clone).MapTo(self, true);
+            ((IMapper) clone).MapTo(self, true, true);
             State.Remove(clone);
             state.Remove(SystemFields.Shapshot);
         }

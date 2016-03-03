@@ -10,11 +10,6 @@
     /// </summary>
     public static partial class Extensions
     {
-        private static partial class SystemFields
-        {
-            public const string IsChanged = "IsChanged";
-        }
-
         public static void AcceptChanges(this IChangeTracking self)
         {
             self.EndEdit();

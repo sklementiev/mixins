@@ -1,6 +1,8 @@
-﻿namespace Mixins.Tests.Data
+using System.Collections.Generic;
+
+namespace Mixins.Tests.Data
 {
-    public class Product : IMixin
+    public class MultyCycle : IComposite
     {
         public string Name
         {
@@ -8,7 +10,7 @@
             set { this.SetValue(value); }
         }
 
-        public decimal Price
+        public IEnumerable<Wheel> Wheels
         {
             get { return this.GetValue(); }
             set { this.SetValue(value); }

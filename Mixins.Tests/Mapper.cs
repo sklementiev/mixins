@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Mixins.Tests.Data;
 using NUnit.Framework;
 
@@ -90,6 +92,53 @@ namespace Mixins.Tests
             Assert.AreEqual("Foo", bar.Name);
             Assert.AreEqual(null, bar.Tag);
             Assert.AreEqual(null, bar.Boo);
+        }
+
+        [Test]
+        public void ComplexMixinsCanMap()
+        {
+            var source = new Whole
+            {
+                Part = new Part { Name = "part1" },
+                Parts = new List<Part> { new Part { Name = "part2" }, new Part { Name = "part3" } }
+            };
+
+            var destination = new Whole();
+            source.MapTo(destination);
+            Assert.IsTrue(source.EqualsByValue(destination));
+        }
+
+        [Test]
+        public void ComplexMixinsWithArraysCanMap()
+        {
+            var source = new Whole
+            {
+                Part = new Part { Name = "part1" },
+                Parts = new [] { new Part { Name = "part2" }, new Part { Name = "part3" } }
+            };
+
+            var destination = new Whole();
+            source.MapTo(destination);
+            Assert.IsTrue(source.EqualsByValue(destination));
+        }
+
+        [Test]
+        public void ComplexMixinsCanMapToOtherComplexMixins()
+        {
+            var source = new Whole
+            {
+                Part = new Part { Name = "part1" },
+                Parts = new[] { new Part { Name = "part2" }, new Part { Name = "part3" } }
+            };
+
+            var destination = new VievModel();
+            source.MapTo(destination, deep: true);
+            Assert.AreNotSame(source.Part, destination.Part);
+            Assert.AreEqual(source.Part.Name, destination.Part.Name);
+            Assert.AreNotSame(source.Parts, destination.Parts);
+            Assert.AreEqual(source.Parts.Count(), destination.Parts.Count());
+            Assert.AreEqual(source.Parts.First().Name, destination.Parts.First().Name);
+            Assert.AreEqual(source.Parts.Last().Name, destination.Parts.Last().Name);
         }
     }
 }

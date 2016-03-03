@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -28,6 +29,7 @@ namespace Mixins
 
         public static object GetProperty(this IMixin self, string name)
         {
+            EnsurePropertyName(ref name);
             var type = self.GetPropertyType(name);
             var value = self.GetPropertyInternal(name);
             if (type != null && value == Value.Undefined)
@@ -35,6 +37,15 @@ namespace Mixins
                 return type.GetDefaultValue();
             }
             return value == Value.Undefined ? null : value;
+        }
+
+        public static void SetProperty(this IMixin self, string name, object value)
+        {
+            EnsurePropertyName(ref name); 
+            if (Equals(value, self.GetProperty(name))) return;
+            if (!StateChanging(self, name, value)) return; // we can cancel state change
+            self.SetPropertyInternal(name, value);
+            StateChanged(self, name, value);
         }
 
         public static IEnumerable<string> GetMembers(this IMixin self)
@@ -50,18 +61,36 @@ namespace Mixins
             return value == null || value == Value.Undefined ? null : value.GetType();
         }
 
+        private static void EnsurePropertyName(ref string name)
+        {
+            name = name.Trim();
+            if (name.StartsWith(SystemFields.Prefix))
+            {
+                throw new Exception("Property name cannot start with #");
+            }
+        }
+
         private static object GetDefaultValue(this Type type)
         {
             if (type == null) return null;
             return type.IsValueType ? Activator.CreateInstance(type) : null;
         }
 
-        internal static void SetProperty(this IMixin self, string name, object value)
+        private static IList CloneTypedList(this object propertyValue)
         {
-            if (Equals(value, self.GetProperty(name))) return;
-            if (!StateChanging(self, name, value)) return; // we can cancel state change
-            self.SetPropertyInternal(name, value);
-            StateChanged(self, name, value);
+            return propertyValue.GetType().CloneTypedList();
+        }
+
+        private static IList CloneTypedList(this Type propertyType)
+        {
+            var listType = typeof(List<>);
+            var elementType = propertyType.GetGenericArguments();
+            if (!elementType.Any()) // array (we still create List for a clone)
+            {
+                elementType = new[] { propertyType.GetElementType() };
+            }
+            var concreteType = listType.MakeGenericType(elementType);
+            return (IList)Activator.CreateInstance(concreteType);
         }
 
         internal static Dictionary<string, object> GetInternalState(this IMixin self)
@@ -69,15 +98,10 @@ namespace Mixins
             return State.GetOrCreateValue(self);
         }
 
-        private static partial class SystemFields
-        {
-            public const char Prefix = '#';
-        }
-
         internal static Dictionary<string, object> GetPublicState(this IMixin self)
         {
             return self.GetInternalState()
-                .Where(c => c.Key.First() != SystemFields.Prefix && c.Key != SystemFields.IsChanged)
+                .Where(c => !c.Key.StartsWith(SystemFields.Prefix) && c.Key != SystemFields.IsChanged)
                 .ToDictionary(c => c.Key, c => c.Value);
         }
 

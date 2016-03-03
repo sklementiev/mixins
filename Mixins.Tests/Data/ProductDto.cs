@@ -1,6 +1,6 @@
 ﻿namespace Mixins.Tests.Data
 {
-    public class Product : IMixin
+    public class ProductDto : IMapper
     {
         public string Name
         {
@@ -9,6 +9,12 @@
         }
 
         public decimal Price
+        {
+            get { return this.GetValue(); }
+            set { this.SetValue(value); }
+        }
+
+        public string ProducedBy
         {
             get { return this.GetValue(); }
             set { this.SetValue(value); }

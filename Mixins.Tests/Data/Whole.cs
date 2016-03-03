@@ -1,14 +1,16 @@
-﻿namespace Mixins.Tests.Data
+using System.Collections.Generic;
+
+namespace Mixins.Tests.Data
 {
-    public class Product : IMixin
+    public class Whole : IComposite, IEditableObject
     {
-        public string Name
+        public Part Part
         {
             get { return this.GetValue(); }
             set { this.SetValue(value); }
         }
 
-        public decimal Price
+        public IEnumerable<Part> Parts
         {
             get { return this.GetValue(); }
             set { this.SetValue(value); }

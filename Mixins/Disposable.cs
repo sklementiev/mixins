@@ -9,11 +9,6 @@ namespace Mixins
 
     public static partial class Extensions
     {
-        private static partial class SystemFields
-        {
-            public const string Lifetime = "#lifetime";
-        }
-
         internal class Lifetime<T>
         {
             private Action<T> action;
@@ -40,13 +35,13 @@ namespace Mixins
         {
             var state = self.GetInternalState();
             object old;
-            if (state.TryGetValue(SystemFields.Lifetime, out old))
+            if (state.TryGetValue(SystemFields.LifeTime, out old))
             {
                 ((Lifetime<T>) old).Reset(action); // reset old action if any
             }
             else
             {
-                state[SystemFields.Lifetime] = new Lifetime<T>(action, self);
+                state[SystemFields.LifeTime] = new Lifetime<T>(action, self);
             }
         }
     }
