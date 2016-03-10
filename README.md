@@ -75,6 +75,8 @@ So every mixin can
 - Get a property type 
 - Can be compared with any other mixin by value. 
 
+> Mixins have very interesting property - they don't allocate any memory for its state until you explicitly assign that state. The defaul value for a property is a default value for property type.     
+
 When dealing with mixin state you are not limited with typed properties only, you can define any property with pretty much any name and value!
 
 ```csharp
@@ -164,6 +166,38 @@ banana.Price = 3; // prints "Price changed to 3"
 ```
 
 How cool is that?
+
+INotifyStateChange mixin also supports dependent properties notification. Let's say we have property FullName that is actually a combination of FirstName and LastName
+
+```csharp
+public string FirstName
+{
+    get { return this.GetValue(); }
+    set { this.SetValue(value); }
+}
+
+public string LastName
+{
+    get { return this.GetValue(); }
+    set { this.SetValue(value); }
+}
+
+public string FullName
+{
+    get { return FirstName + " " + LastName; }
+}
+```
+How can we notify consumers (usually UI control) of FullName changes when any of FirstName or LastName changes? It's super easy with mixins! Just put this in the class constructor!
+
+```csharp
+public Person()
+{
+    this.NotifyOnChange(
+        () => FullName,
+        // depends on
+        () => FirstName, () => LastName);
+}
+```
 
 There are so many options to create and reuse generic algorithms/behaviours when use mixins. For example - mapping. It is usual and mundane task to copy data from DTO object to ViewModel (especially if they share the same property names) and with mixins help it's a breeze!
 
