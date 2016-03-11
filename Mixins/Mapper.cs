@@ -15,6 +15,13 @@ namespace Mixins
     {
         public static void MapTo(this IMapper self, IMixin destination, bool shapshot = false, bool deep = false)
         {
+            MapToInternal(self, destination, new Dictionary<IMixin, object>(), shapshot, deep);
+        }
+
+        public static void MapToInternal(IMapper self, IMixin destination, Dictionary<IMixin, object> path, bool shapshot = false, bool deep = false)
+        {
+            path.Add(self, null);
+
             if (shapshot)
             {
                 var newProps = destination.GetMembers().Except(self.GetMembers()).ToList();
@@ -33,6 +40,8 @@ namespace Mixins
                 // property
                 if (sourceProperty is IMapper && deep)
                 {
+                    if (path.ContainsKey((IMixin)sourceProperty)) return;
+
                     var mapper = (IMapper)sourceProperty;
                     if (destinationPropety == null && destPropType != null && typeof(IMixin).IsAssignableFrom(destPropType))
                     {
@@ -64,6 +73,7 @@ namespace Mixins
                     var type = destinationList.GetType().GetGenericArguments().First();
                     foreach (var item in (IEnumerable<IMapper>)sourceProperty)
                     {
+                        if (path.ContainsKey(item)) return;
                         var destItem = (IMixin)Activator.CreateInstance(type);
                         item.MapTo(destItem, shapshot, deep: true);
                         destinationList.Add(destItem);

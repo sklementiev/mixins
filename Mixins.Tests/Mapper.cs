@@ -140,5 +140,16 @@ namespace Mixins.Tests
             Assert.AreEqual(source.Parts.First().Name, destination.Parts.First().Name);
             Assert.AreEqual(source.Parts.Last().Name, destination.Parts.Last().Name);
         }
+
+        [Test]
+        public void CircularRefsMixinsCanMap()
+        {
+            var source = new Composite() { Name = "Test" };
+            source.Part = source;
+            var destination = new Composite();
+            destination.Part = destination;
+            source.MapTo(destination, deep: true);
+            Assert.AreEqual("Test", destination.Name);
+        }
     }
 }
