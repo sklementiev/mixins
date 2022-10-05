@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mixins", "Mixins\Mixins.csproj", "{FACE18CC-8B97-4121-9E2F-B8390B90ECF9}"
 EndProject
@@ -15,6 +15,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mixins.NET", "Mixins.NET\Mixins.NET.csproj", "{968F6579-6C64-49CF-AB7E-A23CCB1EF638}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mixins.NET.Tests", "Mixins.NET.Tests\Mixins.NET.Tests.csproj", "{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -66,9 +70,36 @@ Global
 		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A11444C7-165C-4627-9716-479B4CEBCFA5}.Release|x86.ActiveCfg = Release|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Debug|x86.Build.0 = Debug|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Release|Any CPU.Build.0 = Release|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Release|x86.ActiveCfg = Release|Any CPU
+		{968F6579-6C64-49CF-AB7E-A23CCB1EF638}.Release|x86.Build.0 = Release|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Debug|x86.Build.0 = Debug|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Release|x86.ActiveCfg = Release|Any CPU
+		{0BF7E994-FEB5-46D3-A5BC-3458DD2072DD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9FDADAA1-0085-4A95-A64C-E9C1FE60F449}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Mixins.vsmdi
